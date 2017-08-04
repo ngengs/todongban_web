@@ -36,3 +36,4 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 *.ppk
 uploads/
 !uploads/index.html
+/application/config/sensitive.php
