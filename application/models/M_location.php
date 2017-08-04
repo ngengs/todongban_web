@@ -28,7 +28,7 @@ class M_location extends TDB_Model
      *
      * @return bool result of query
      */
-	public function insert_location($id_user, $latitude, $longtitude)
+	public function insert_location($id_user, $latitude, $longitude)
 	{
 		$date = date('Y-m-d H:i:s');
 //		Generate query
@@ -42,7 +42,7 @@ class M_location extends TDB_Model
 		$this->db->set('ID', $this->generate_id());
 		$this->db->set('ID_USER', $id_user);
 		$this->db->set('LATITUDE', $latitude);
-		$this->db->set('LONGTITUDE', $longtitude);
+		$this->db->set('LONGITUDE', $longitude);
 		$this->db->set('DATE', $date);
 		$this->db->set('STATUS', 1);
 		$this->db->from('USER_LOCATION');

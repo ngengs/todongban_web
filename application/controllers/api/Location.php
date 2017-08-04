@@ -33,12 +33,12 @@ class Location extends TDB_Controller
 		$this->log->write_log('debug', 'Location: index_post:');
 		if (!$this->check_access()) $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Cant access');
 		$latitude = (double)$this->input->post('latitude');
-		$longtitude = (double)$this->input->post('longtitude');
+		$longitude = (double)$this->input->post('longitude');
 		if (empty($longtitude) || empty($latitude)) {
 			$this->response_error(STATUS_CODE_SERVER_ERROR, 'Data not complete');
 		}
 		$user = $this->get_user();
-		$result = $this->m_location->insert_location($user->ID, $latitude, $longtitude);
+		$result = $this->m_location->insert_location($user->ID, $latitude, $longitude);
 		if ($result) {
 			$this->response('Success Update Location');
 		} else $this->response_error(STATUS_CODE_SERVER_ERROR, 'Fail update location');
