@@ -30,7 +30,7 @@ class User extends TDB_Controller
      * string password Password of user to check
      * string device_id Device id of user
      */
-    public function sign_in_post()
+    public function signin_post()
     {
         $this->log->write_log('debug', $this->TAG . ': sign_in: ');
         $username = $this->input->post('username');
@@ -65,6 +65,9 @@ class User extends TDB_Controller
             case 3:
                 $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Verification failed');
                 break;
+            case 4:
+                $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'User banned');
+                break;
             case 0:
             default:
                 $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'User not found');
@@ -88,10 +91,11 @@ class User extends TDB_Controller
      * string identity_number Identity number of user
      * string address Address of user to check
      * string device_id Device id of user
+     * int type User Type (1: personal, 2: garage)
      * file identity_picture Image of identity user
      * file avatar Image of profile picture user
      */
-    public function sign_up_post()
+    public function signup_post()
     {
         $this->log->write_log('debug', $this->TAG . ': sign_up: ');
         $username = $this->input->post('username');
@@ -103,11 +107,23 @@ class User extends TDB_Controller
         $identity_number = $this->input->post('identity_number');
         $address = $this->input->post('address');
         $device_id = $this->input->post('device_id');
+        $type = $this->input->post('type');
+        $this->log->write_log('debug', $this->TAG . ': $username: '.$username);
+        $this->log->write_log('debug', $this->TAG . ': $email: '.$email);
+        $this->log->write_log('debug', $this->TAG . ': $password: '.$password);
+        $this->log->write_log('debug', $this->TAG . ': $full_name: '.$full_name);
+        $this->log->write_log('debug', $this->TAG . ': $phone: '.$phone);
+        $this->log->write_log('debug', $this->TAG . ': $gender: '.$gender);
+        $this->log->write_log('debug', $this->TAG . ': $identity_number: '.$identity_number);
+        $this->log->write_log('debug', $this->TAG . ': $address: '.$address);
+        $this->log->write_log('debug', $this->TAG . ': $device_id: '.$device_id);
+        $this->log->write_log('debug', $this->TAG . ': $type: '.$type);
         if (empty($username) || empty($email) || empty($password) || empty($full_name) || empty($phone)
             || empty($gender)
             || empty($identity_number)
             || empty($address)
             || empty($device_id)
+            || empty($type)
         ) {
             $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Data not complete');
         }
@@ -127,11 +143,12 @@ class User extends TDB_Controller
         $upload_path = FCPATH . '/uploads';
         if (!is_dir($upload_path)) mkdir($upload_path);
         $upload_path = $upload_path . '/' . $username;
+        $this->log->write_log('debug', $this->TAG . ': Upload Path: '.$upload_path);
         if (!is_dir($upload_path)) mkdir($upload_path);
 
         $upload_config = array(
             'upload_path' => $upload_path,
-            'allowed_types' => 'jpg|png',
+            'allowed_types' => '*',
             'overwrite' => true,
             'file_ext_tolower' => true
         );
@@ -140,13 +157,19 @@ class User extends TDB_Controller
         if (!$this->upload->do_upload('avatar')) {
             $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Failed upload profile picture');
         }
+        $avatar = $this->upload->data('file_name');
 
         $identity_name = 'IDP_' . random_string('alnum', 16);
         $upload_config['file_name'] = $identity_name;
         $this->upload->initialize($upload_config);
         if (!$this->upload->do_upload('identity_picture')) {
+            // Delete uploaded avatar and the directory
+            unlink($upload_path.'/'.$avatar);
+            rmdir ($upload_path);
             $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Failed upload identity picture');
         }
+        $identity = $this->upload->data('file_name');
+
         $result = $this->m_user->create($id,
                                         $username,
                                         $email,
@@ -154,12 +177,40 @@ class User extends TDB_Controller
                                         $full_name,
                                         $phone,
                                         $gender,
-                                        $avatar_name,
+                                        $avatar,
                                         $identity_number,
-                                        $identity_name,
+                                        $identity,
                                         $address,
-                                        $device_id);
+                                        $device_id,
+                                        2,
+                                        $type);
         if ($result) {
+            if ($type == 2) {
+                $garage_name = $this->input->post('garage_name');
+                $garage_open = $this->input->post('garage_open');
+                $garage_close = $this->input->post('garage_close');
+                $garage_address = $this->input->post('garage_address');
+                $garage_latitude = $this->input->post('garage_latitude');
+                $garage_longitude = $this->input->post('garage_longitude');
+                if (empty($garage_name) && empty($garage_open) && empty($garage_close) && empty($garage_address)
+                    && empty($garage_latitude)
+                    && empty($garage_longitude)) {
+                    $this->response_error(STATUS_CODE_SERVER_ERROR, 'Data not complete');
+                }
+                $this->load->model('m_garage');
+                $result_garage = $this->m_garage->create($id,
+                                                         $garage_name,
+                                                         $garage_open,
+                                                         $garage_close,
+                                                         $garage_address,
+                                                         $garage_latitude,
+                                                         $garage_longitude);
+                if (!$result_garage) {
+                    $this->m_user->delete_pure($id);
+                    $this->log->write_log('error', $this->TAG . ':  sign_up: Inserting data garage error, rollback user');
+                    $this->response_error(STATUS_CODE_SERVER_ERROR, 'Something wrong when create user');
+                }
+            }
             $this->load->model('m_type');
             $this->load->model('m_config');
             $help_type = $this->m_type->get();
@@ -185,7 +236,7 @@ class User extends TDB_Controller
      * method: get
      *
      */
-    public function sign_out_get()
+    public function signout_get()
     {
         $this->log->write_log('debug', $this->TAG . ': sign_out: ');
         if (!$this->check_access()) $this->response_404();
@@ -198,9 +249,19 @@ class User extends TDB_Controller
         } else $this->response_error(1, 'Failed logout');
     }
 
-    public function check_get()
+    public function check_status_get()
     {
         $this->log->write_log('debug', $this->TAG . ': check: ');
+        $status = -99;
+        $this->check_access();
+        $user = $this->get_user();
+        if (!empty($user)){
+            $status = $user->STATUS;
+        }
+        $this->response((int) $status);
+    }
+
+    public function check_get(){
         var_dump($this->check_access());
     }
 

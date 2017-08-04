@@ -44,7 +44,7 @@ class TDB_Model extends CI_Model
      */
 	protected function set_creator($id_creator, $date = null)
 	{
-		if (!empty($date)) $date = date('Y-m-d H:i:s');
+		if (empty($date)) $date = date('Y-m-d H:i:s');
 		$this->db->set('ID_CREATE', $id_creator);
 		$this->db->set('DATE_CREATE', $date);
 	}
@@ -58,7 +58,7 @@ class TDB_Model extends CI_Model
      */
 	protected function set_updater($id_updater, $date = null)
 	{
-		if (!empty($date)) $date = date('Y-m-d H:i:s');
+		if (empty($date)) $date = date('Y-m-d H:i:s');
 		$this->db->set('ID_UPDATE', $id_updater);
 		$this->db->set('DATE_UPDATE', $date);
 	}

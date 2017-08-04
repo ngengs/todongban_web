@@ -8,9 +8,11 @@ use Firebase\JWT\JWT;
  * Class MY_Controller
  *
  * @property  \M_user m_user User Model
+ * @property  \M_garage m_garage Garage Model
  * @property  \M_config m_config User Model
  * @property  \M_location m_location Location Model
  * @property  \M_type m_type Help Type Model
+ * @property  \Fcm fcm Firebase Cloud Message Library
  * @author     rizky Kharisma <ngeng.ngengs@gmail.com>
  */
 class TDB_Controller extends CI_Controller
@@ -29,7 +31,12 @@ class TDB_Controller extends CI_Controller
         parent::__construct();
         $this->api_controller = $api;
         $this->user = null;
-        if (!$this->api_controller) $this->load->library('session');
+        if (!$this->api_controller) {
+            $this->load->config('sensitive', true);
+            $this->load->library('session');
+            $this->load->helper('url');
+            $this->load->helper('assets_helper');
+        }
     }
 
     /**
@@ -48,9 +55,11 @@ class TDB_Controller extends CI_Controller
      * Function to check if user can access.
      * This method must call in every router who need only logged in access.
      *
+     * @param bool $auto_redirect Page will auto redirect to sign in page if cant access
+     *
      * @return bool Can access or not
      */
-    protected function check_access()
+    protected function check_access($auto_redirect = false)
     {
         $this->log->write_log('debug', $this->TAG . ': check_access: ');
         $can_access = false;
@@ -80,9 +89,13 @@ class TDB_Controller extends CI_Controller
 
         if (!empty($this->user)) {
             if ($this->api_controller) {
-                if ($this->user->STATUS == 1 && $this->user->TYPE == 1) $can_access = true;
+                if ($this->user->STATUS == 1 && ($this->user->TYPE == 1 || $this->user->TYPE == 2)) $can_access = true;
             } else {
-                if ($this->user->STATUS == 1 && $this->user->TYPE == 2) $can_access = true;
+                if ($this->user->STATUS == 1 && $this->user->TYPE == -1) $can_access = true;
+            }
+        } else {
+            if (!$this->api_controller) {
+                if ($auto_redirect) redirect('admin/auth/signin?next=' . base64_encode(urlencode(current_url())));
             }
         }
 
@@ -229,6 +242,31 @@ class TDB_Controller extends CI_Controller
     }
 
     /**
+     * Function to load basic data for view
+     *
+     * @return array|null $data for view
+     */
+    protected function basic_data()
+    {
+        if (!$this->api_controller) {
+            $data = array();
+            $data['app_name'] = $this->config->item('app_name');
+            $data['app_name_short'] = $this->config->item('app_name_short');
+            $data['base_title'] = $this->config->item('app_name');
+            $data['error'] = $this->session->flashdata('error');
+            if ($this->check_access()) {
+                $data['user'] = $this->get_user();
+                $data['count_validation'] = $this->m_user->count_not_active();
+                $data['count_rejected'] = $this->m_user->count_rejected();
+            }
+
+            return $data;
+        }
+
+        return null;
+    }
+
+    /**
      * Function to create JWT token
      *
      * @param null|array $data Data to send with JWT. this app nedd array(username, device_id)
@@ -358,5 +396,29 @@ class TDB_Controller extends CI_Controller
         $this->output->set_output(json_encode($response));
         $this->output->_display();
         die;
+    }
+
+    protected function send_email($to, $subject, $message)
+    {
+        $this->log->write_log('debug',
+                              $this->TAG . ': send_email: to:' . $to . ' subject:' . $subject . ' host:'
+                              . $this->config->item('sensitive', 'sensitive_smtp_host'));
+        $this->load->library('email');
+        $config['protocol'] = 'smtp';
+        $config['smtp_host'] = $this->config->item('smtp_host', 'sensitive');
+        $config['smtp_user'] = $this->config->item('smtp_user', 'sensitive');
+        $config['smtp_pass'] = $this->config->item('smtp_pass', 'sensitive');
+        $config['smtp_port'] = $this->config->item('smtp_port', 'sensitive');
+        $config['smtp_crypto'] = 'ssl';
+
+        $this->email->initialize($config);
+
+        $this->email->from($config['smtp_user'], $this->config->item('app_name'));
+        $this->email->to($to);
+
+        $this->email->subject($subject);
+        $this->email->message($message);
+
+        $this->email->send();
     }
 }
