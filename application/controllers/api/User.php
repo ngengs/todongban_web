@@ -73,7 +73,7 @@ class User extends TDB_Controller
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Something wrong with server');
         }
         $user->DEVICE_ID = $device_id;
-        if ($user->TYPE == 1) {
+        if ($user->TYPE == -1) {
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Hanya untuk pengguna');
         }
 
