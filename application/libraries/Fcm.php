@@ -1,4 +1,21 @@
 <?php
+/**
+ * Copyright (c) 2017 Rizky Kharisma (@ngengs)
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
@@ -20,6 +37,7 @@ class Fcm
     const CODE_REGISTER_COMPLETE = 100;
     const CODE_REGISTER_REJECTED = 101;
     const CODE_HELP_REQUEST = 200;
+    const CODE_HELP_RESPONSE = 201;
 
     /**
      * Fcm constructor.
@@ -27,7 +45,7 @@ class Fcm
     public function __construct()
     {
         $this->CI =& get_instance();
-        $this->payload = array();
+        $this->payload = [];
         $this->CI->config->load('sensitive');
     }
 
@@ -37,52 +55,96 @@ class Fcm
      *
      * @return $this
      */
-    public function set_target($id = array())
+    public function set_targets(?array $id): self
     {
         $this->to = $id;
 
         return $this;
     }
 
-    public function set_title($title)
+    public function set_target(?string $id): self
+    {
+        $this->to = $id;
+
+        return $this;
+    }
+
+    /**
+     * @param string $title
+     *
+     * @return \Fcm
+     */
+    public function set_title(string $title): self
     {
         $this->payload['title'] = $title;
 
         return $this;
     }
 
-    public function set_message($message)
+    /**
+     * @param string $message
+     *
+     * @return \Fcm
+     */
+    public function set_message(string $message): self
     {
         $this->payload['message'] = $message;
 
         return $this;
     }
 
-    public function set_code($code)
+    /**
+     * @param int $code
+     *
+     * @return \Fcm
+     * @throws \Exception
+     *
+     */
+    public function set_code(int $code): self
     {
         $can_set = false;
         switch ($code) {
             case self::CODE_HELP_REQUEST:
-                $can_set = true;
-                break;
             case self::CODE_REGISTER_COMPLETE:
-                $can_set = true;
-                break;
             case self::CODE_REGISTER_REJECTED:
                 $can_set = true;
                 break;
         }
         if ($can_set) {
             $this->payload['code'] = $code;
-        } else throw new Exception("Code cant be used");
+        } else {
+            throw new Exception("Code cant be used");
+        }
 
         return $this;
     }
 
     /**
-     * @param mixed $key
+     * @param array $payloads
+     *
+     * @return \Fcm
      */
-    public function set_key($key)
+    public function set_payloads(array $payloads = []): self
+    {
+        foreach ($payloads as $key => $value) {
+            $this->payload[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    public function set_payload(string $key, string $value): self
+    {
+        $this->payload[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return \Fcm
+     */
+    public function set_key(string $key): self
     {
         $this->key = $key;
 
@@ -99,20 +161,22 @@ class Fcm
             || empty($this->key)) {
             throw new Exception("Must build with all set first");
         } else {
-            $client = new \GuzzleHttp\Client(array('curl' => array(CURLOPT_SSL_VERIFYPEER => false)));
-            $data = array();
+            $client = new \GuzzleHttp\Client(['curl' => [CURLOPT_SSL_VERIFYPEER => false]]);
+            $data = [];
             $data['data'] = $this->payload;
             if (is_array($this->to)) {
                 $data['registration_ids'] = $this->to;
-            } else $data['to'] = $this->to;
+            } else {
+                $data['to'] = $this->to;
+            }
             $client->request('POST',
                              $this->URL,
-                             array(
+                             [
                                  'json' => $data,
-                                 'headers' => array(
+                                 'headers' => [
                                      'Authorization' => 'key=' . $this->key
-                                 )
-                             ));
+                                 ]
+                             ]);
         }
     }
 

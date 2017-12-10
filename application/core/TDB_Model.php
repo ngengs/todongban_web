@@ -1,5 +1,22 @@
 <?php
 /**
+ * Copyright (c) 2017 Rizky Kharisma (@ngengs)
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Class TDB_Model
  *
  * @author     rizky Kharisma <ngeng.ngengs@gmail.com>
@@ -9,31 +26,33 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class TDB_Model extends CI_Model
 {
 
-	/**
-	 * TDB_Model constructor.
-	 */
-	public function __construct()
-	{
-		parent::__construct();
-		$this->load->database();
-	}
+    /**
+     * TDB_Model constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->database();
+    }
 
     /**
      * Function to generate ID.
      * This use mysql UUID.
      *
-     * @return string generated ID
+     * @return string|null generated ID
      * @throws \Exception if cant create ID
      */
-	public function generate_id()
-	{
-		$this->db->select('UUID() as id', false);
-		$result = $this->db->get();
-		$result = $result->result();
-		if (empty($result)) throw new Exception('Something wrong with database');
+    public function generate_id(): ?string
+    {
+        $this->db->select('UUID() as id', false);
+        $result = $this->db->get();
+        $result = $result->result();
+        if (empty($result)) {
+            throw new Exception('Something wrong with database');
+        }
 
-		return $result[0]->id;
-	}
+        return $result[0]->id;
+    }
 
     /**
      * Function to add set data of creator.
@@ -42,12 +61,14 @@ class TDB_Model extends CI_Model
      * @param string $id_creator id of user creator
      * @param string|null $date Date of create
      */
-	protected function set_creator($id_creator, $date = null)
-	{
-		if (empty($date)) $date = date('Y-m-d H:i:s');
-		$this->db->set('ID_CREATE', $id_creator);
-		$this->db->set('DATE_CREATE', $date);
-	}
+    protected function set_creator(string $id_creator, ?string $date = null)
+    {
+        if (empty($date)) {
+            $date = date('Y-m-d H:i:s');
+        }
+        $this->db->set('ID_CREATE', $id_creator);
+        $this->db->set('DATE_CREATE', $date);
+    }
 
     /**
      * Function to add set data of updater.
@@ -56,10 +77,12 @@ class TDB_Model extends CI_Model
      * @param string $id_updater id of user update
      * @param string|null $date Date of update
      */
-	protected function set_updater($id_updater, $date = null)
-	{
-		if (empty($date)) $date = date('Y-m-d H:i:s');
-		$this->db->set('ID_UPDATE', $id_updater);
-		$this->db->set('DATE_UPDATE', $date);
-	}
+    protected function set_updater(string $id_updater, ?string $date = null)
+    {
+        if (empty($date)) {
+            $date = date('Y-m-d H:i:s');
+        }
+        $this->db->set('ID_UPDATE', $id_updater);
+        $this->db->set('DATE_UPDATE', $date);
+    }
 }

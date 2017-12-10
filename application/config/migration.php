@@ -1,4 +1,21 @@
 <?php
+/**
+ * Copyright (c) 2017 Rizky Kharisma (@ngengs)
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /*
@@ -11,7 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | and disable it back when you're done.
 |
 */
-$config['migration_enabled'] = FALSE;
+$config['migration_enabled'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,7 +74,7 @@ $config['migration_table'] = 'migrations';
 | in your code to have the latest migration.
 |
 */
-$config['migration_auto_latest'] = FALSE;
+$config['migration_auto_latest'] = false;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,4 +98,4 @@ $config['migration_version'] = 0;
 | Also, writing permission is required within the migrations path.
 |
 */
-$config['migration_path'] = APPPATH.'migrations/';
+$config['migration_path'] = APPPATH . 'migrations/';

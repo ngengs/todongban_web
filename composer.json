@@ -3,12 +3,12 @@
 	"name": "ngengs/todongban_web",
 	"type": "project",
 	"homepage": "https://github.com/ngengs",
-	"license": "MIT",
+	"license": "Apache",
 	"config": {
 	  "vendor-dir": "application/vendor"
 	},
 	"require": {
-		"php": ">=5.3.7",
+		"php": ">=7.1",
 		"firebase/php-jwt": "v5.0.0",
 		"guzzlehttp/guzzle": "~6.0"
 	},

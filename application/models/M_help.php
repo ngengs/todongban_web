@@ -23,7 +23,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * @author     rizky Kharisma <ngeng.ngengs@gmail.com>
  */
-class M_location extends TDB_Model
+class M_help extends TDB_Model
 {
     private $TAG = 'M_location';
 
@@ -41,37 +41,64 @@ class M_location extends TDB_Model
      *
      * @param string $id_user User ID
      * @param float $latitude user last position Latitude
-     * @param float $longitude user last position Longtitude
+     * @param float $longitude user last position Longitude
+     *
+     * @param String $id_help_type
+     * @param null|string $message
+     * @param null|string $location_name
      *
      * @return bool result of query
      * @throws \Exception
      */
-    public function insert_location(string $id_user, float $latitude, float $longitude)
+    public function insert_request(string $id_user, float $latitude, float $longitude, String $id_help_type,
+        ?string $message, ?string $location_name)
     {
+        $this->log->write_log('debug', $this->TAG . ': insert_request: ');
         $date = date('Y-m-d H:i:s');
-//		Generate query
-//		Generate update query
-        $this->db->where('ID_USER', $id_user);
-        $this->db->where('STATUS', 1);
-        $this->db->set('STATUS', 0);
-        $this->db->from('USER_LOCATION');
-        $query_update = $this->db->get_compiled_update();
+        $id = $this->generate_id();
 //		Generate insert query
-        $this->db->set('ID', $this->generate_id());
+        $this->db->set('ID', $id);
         $this->db->set('ID_USER', $id_user);
+        $this->db->set('ID_HELP_TYPE', $id_help_type);
         $this->db->set('LATITUDE', $latitude);
         $this->db->set('LONGITUDE', $longitude);
-        $this->db->set('DATE', $date);
+        if (!empty($message)) {
+            $this->db->set('MESSAGE', $message);
+        }
+        if (!empty($location_name)) {
+            $this->db->set('LOCATION_NAME', $location_name);
+        }
         $this->db->set('STATUS', 1);
-        $this->db->from('USER_LOCATION');
+        $this->set_creator($id_user, $date);
+        $this->set_updater($id_user, $date);
+        $this->db->from('HELP_REQUEST');
         $query_insert = $this->db->get_compiled_insert();
 
 //		Run transaction
         $this->db->trans_start();
-        $this->db->query($query_update);
         $this->db->query($query_insert);
         $this->db->trans_complete();
 
-        return $this->db->trans_status();
+        return $id;
+    }
+
+    /**
+     * @param string $id_request
+     * @param string $id_user
+     *
+     * @return mixed
+     */
+    public function cancel_request(string $id_request, string $id_user)
+    {
+        $this->log->write_log('debug', $this->TAG . ': cancel_request: ');
+        $this->db->where('ID', $id_request);
+        $this->db->where('ID_USER', $id_user);
+        $this->db->set('STATUS', 0);
+        $this->set_updater($id_user);
+        $this->db->from('HELP_REQUEST');
+        $result = $this->db->update();
+
+        return $result;
+
     }
 }

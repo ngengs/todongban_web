@@ -1,4 +1,21 @@
 <?php
+/**
+ * Copyright (c) 2017 Rizky Kharisma (@ngengs)
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use Firebase\JWT\ExpiredException;
@@ -11,6 +28,7 @@ use Firebase\JWT\JWT;
  * @property  \M_garage m_garage Garage Model
  * @property  \M_config m_config User Model
  * @property  \M_location m_location Location Model
+ * @property  \M_help m_help Help Model
  * @property  \M_type m_type Help Type Model
  * @property  \Fcm fcm Firebase Cloud Message Library
  * @author     rizky Kharisma <ngeng.ngengs@gmail.com>
@@ -26,7 +44,7 @@ class TDB_Controller extends CI_Controller
      *
      * @param bool $api Check is child need parent as API Controller or not
      */
-    public function __construct($api = false)
+    public function __construct(bool $api = false)
     {
         parent::__construct();
         $this->api_controller = $api;
@@ -58,8 +76,9 @@ class TDB_Controller extends CI_Controller
      * @param bool $auto_redirect Page will auto redirect to sign in page if cant access
      *
      * @return bool Can access or not
+     * @throws \BadFunctionCallException
      */
-    protected function check_access($auto_redirect = false)
+    protected function check_access(bool $auto_redirect = false)
     {
         $this->log->write_log('debug', $this->TAG . ': check_access: ');
         $can_access = false;
@@ -77,7 +96,9 @@ class TDB_Controller extends CI_Controller
                 if (!empty($username)) {
                     $this->load->model('m_user');
                     $user = $this->m_user->get($username);
-                    if (!empty($user)) $user = $user[0];
+                    if (!empty($user)) {
+                        $user = $user[0];
+                    }
                 }
             }
 
@@ -89,13 +110,19 @@ class TDB_Controller extends CI_Controller
 
         if (!empty($this->user)) {
             if ($this->api_controller) {
-                if ($this->user->STATUS == 1 && ($this->user->TYPE == 1 || $this->user->TYPE == 2)) $can_access = true;
+                if ($this->user->STATUS == 1 && ($this->user->TYPE == 1 || $this->user->TYPE == 2)) {
+                    $can_access = true;
+                }
             } else {
-                if ($this->user->STATUS == 1 && $this->user->TYPE == -1) $can_access = true;
+                if ($this->user->STATUS == 1 && $this->user->TYPE == -1) {
+                    $can_access = true;
+                }
             }
         } else {
             if (!$this->api_controller) {
-                if ($auto_redirect) redirect('admin/auth/signin?next=' . base64_encode(urlencode(current_url())));
+                if ($auto_redirect) {
+                    redirect('admin/auth/signin?next=' . base64_encode(urlencode(current_url())));
+                }
             }
         }
 
@@ -105,17 +132,23 @@ class TDB_Controller extends CI_Controller
     /**
      * Function to extract data from JWT token
      *
-     * @param $token JWT token to extract
+     * @param string $token JWT token to extract
      *
      * @return null|object Data of JWT
      * @throws \BadFunctionCallException if call from non API controller
      */
-    private function extract_data_from_token($token)
+    private function extract_data_from_token(string $token)
     {
         $this->log->write_log('debug', $this->TAG . ': extract_user_from_token: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
         $data = null;
-        $encoded = $this->read_token($token);
+        $encoded = null;
+        try {
+            $encoded = $this->read_token($token);
+        } catch (Exception $e) {
+        }
         if (!empty($encoded)) {
             $data = $encoded->sub;
         }
@@ -132,13 +165,17 @@ class TDB_Controller extends CI_Controller
      * @return array User data
      * @throws \BadFunctionCallException if call from non API controller
      */
-    private function check_token_data($username, $device_id)
+    private function check_token_data(string $username, string $device_id)
     {
         $this->log->write_log('debug', $this->TAG . ': check_token_data: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
         $this->load->model('m_user');
         $user = $this->m_user->get($username, $device_id);
-        if (!empty($user)) $user = $user[0];
+        if (!empty($user)) {
+            $user = $user[0];
+        }
 
         return $user;
     }
@@ -151,13 +188,13 @@ class TDB_Controller extends CI_Controller
      *
      * @return mixed function if exist or die if not exist
      */
-    public function _remap($object_called, $params = array())
+    public function _remap($object_called, $params = [])
     {
         if ($this->api_controller) {
             $object_called = $object_called . '_' . $this->input->method(false);
         }
         if (method_exists($this, $object_called)) {
-            return call_user_func_array(array($this, $object_called), $params);
+            return call_user_func_array([$this, $object_called], $params);
         }
         if ($this->api_controller) {
             $this->response_404();
@@ -182,7 +219,9 @@ class TDB_Controller extends CI_Controller
         $message = VALUE_STATUS_MESSAGE_DEFAULT)
     {
         $this->log->write_log('debug', $this->TAG . ': response: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
         $response = $this->generate_response($status, $code, $message, $data);
         $this->send(200, $response);
     }
@@ -196,7 +235,9 @@ class TDB_Controller extends CI_Controller
     private function explode_authorization()
     {
         $this->log->write_log('debug', $this->TAG . ': explode_authorization: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
 
         $header_value = $this->input->get_request_header('authorization');
         if (empty($header_value)) {
@@ -218,7 +259,9 @@ class TDB_Controller extends CI_Controller
         $this->log->write_log('debug', $this->TAG . ': response_404: ');
         if ($this->api_controller) {
             $this->response_error(STATUS_CODE_NOT_FOUND, 'Page not found / wrong method', 404);
-        } else show_404();
+        } else {
+            show_404();
+        }
     }
 
     /**
@@ -228,17 +271,21 @@ class TDB_Controller extends CI_Controller
      * @param string $status_message Status message
      * @param int $header_code Status code in header
      */
-    protected function response_error($status_code, $status_message, $header_code = 200)
+    protected function response_error($status_code, $status_message, $header_code = 500)
     {
         $this->log->write_log('debug', $this->TAG . ': response_error: ');
         if ($this->api_controller) {
-            $response =
-                $this->generate_response(VALUE_STATUS_ERROR,
-                                         $status_code,
-                                         $status_message,
-                                         VALUE_DATA_ERROR);
-            $this->send($header_code, $response);
-        } else show_404();
+            try {
+                $response = $this->generate_response(VALUE_STATUS_ERROR,
+                                                     $status_code,
+                                                     $status_message,
+                                                     VALUE_DATA_ERROR);
+                $this->send($header_code, $response);
+            } catch (BadFunctionCallException $e) {
+            }
+        } else {
+            show_404();
+        }
     }
 
     /**
@@ -246,18 +293,21 @@ class TDB_Controller extends CI_Controller
      *
      * @return array|null $data for view
      */
-    protected function basic_data()
+    protected function basic_data(): ?array
     {
         if (!$this->api_controller) {
-            $data = array();
+            $data = [];
             $data['app_name'] = $this->config->item('app_name');
             $data['app_name_short'] = $this->config->item('app_name_short');
             $data['base_title'] = $this->config->item('app_name');
             $data['error'] = $this->session->flashdata('error');
-            if ($this->check_access()) {
-                $data['user'] = $this->get_user();
-                $data['count_validation'] = $this->m_user->count_not_active();
-                $data['count_rejected'] = $this->m_user->count_rejected();
+            try {
+                if ($this->check_access()) {
+                    $data['user'] = $this->get_user();
+                    $data['count_validation'] = $this->m_user->count_not_active();
+                    $data['count_rejected'] = $this->m_user->count_rejected();
+                }
+            } catch (BadFunctionCallException $e) {
             }
 
             return $data;
@@ -280,27 +330,31 @@ class TDB_Controller extends CI_Controller
     protected function create_token($data = null)
     {
         $this->log->write_log('debug', $this->TAG . ': create_token: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
         $key_file = @file_get_contents('private.pem');
-        if ($key_file === false) throw new Exception('Key File Not Found');
+        if ($key_file === false) {
+            throw new Exception('Key File Not Found');
+        }
         $key = openssl_pkey_get_private($key_file, 'todongban');
 
         $date_now = date('c');
         $date_exp = date('c', strtotime('+1 year', strtotime($date_now)));
-        $token = array(
+        $token = [
             'iss' => base_url(),
             'aud' => base_url(),
             'iat' => strtotime($date_now),
             'exp' => strtotime($date_exp),
             'sub' => $data
-        );
+        ];
 
         $encoded = null;
 
         if ($key && !empty($token)) {
             try {
                 $encoded = JWT::encode($token, $key, 'RS256');
-            } catch (DomainException $exception) {
+            } catch (Exception $exception) {
                 $this->response_error(STATUS_CODE_SERVER_ERROR, $exception);
             }
         } else {
@@ -323,20 +377,22 @@ class TDB_Controller extends CI_Controller
     protected function read_token($jwt)
     {
         $this->log->write_log('debug', $this->TAG . ': read_token: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
         $key_file = @file_get_contents('public.pem');
-        if ($key_file === false) throw new Exception('Key File Not Found');
+        if ($key_file === false) {
+            throw new Exception('Key File Not Found');
+        }
         $key = openssl_pkey_get_public($key_file);
         $decoded = null;
 
         if ($key) {
             try {
                 JWT::$leeway = 60;
-                $decoded = JWT::decode($jwt, $key, array('RS256'));
+                $decoded = JWT::decode($jwt, $key, ['RS256']);
             } catch (ExpiredException $exception) {
                 $this->response_error(STATUS_CODE_KEY_EXPIRED, $exception);
-            } catch (InvalidArgumentException $exception) {
-                $this->response_error(STATUS_CODE_SERVER_ERROR, $exception);
             } catch (UnexpectedValueException $exception) {
                 $this->response_error(STATUS_CODE_SERVER_ERROR, $exception);
             }
@@ -362,15 +418,19 @@ class TDB_Controller extends CI_Controller
     private function generate_response($status, $code, $message, $data)
     {
         $this->log->write_log('debug', $this->TAG . ': generate_response: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
-        if ($message instanceof Exception) $message = $message->getMessage();
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
+        if ($message instanceof Exception) {
+            $message = $message->getMessage();
+        }
 
-        return array(
+        return [
             KEY_STATUS => $status,
             KEY_STATUS_CODE => $code,
             KEY_STATUS_MESSAGE => $message,
             KEY_DATA => $data
-        );
+        ];
     }
 
     /**
@@ -382,10 +442,12 @@ class TDB_Controller extends CI_Controller
      *
      * @throws \BadFunctionCallException
      */
-    private function send($status_code, $response, $custom_header = array())
+    private function send($status_code, $response, $custom_header = [])
     {
         $this->log->write_log('debug', $this->TAG . ': send: ' . $status_code . ', response_status: ');
-        if (!$this->api_controller) throw new BadFunctionCallException('Only for API type controller');
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
         $this->output->set_status_header($status_code);
         $this->output->set_content_type('application/json');
         if (!empty($custom_header)) {

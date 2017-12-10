@@ -1,4 +1,21 @@
 <?php
+/**
+ * Copyright (c) 2017 Rizky Kharisma (@ngengs)
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
@@ -26,16 +43,16 @@ class M_config extends TDB_Model
      *
      * @return int result of query
      */
-    public function create($id_user, $type_id = array())
+    public function create(string $id_user, array $type_id = [])
     {
-        $data = array();
+        $data = [];
         foreach ($type_id as $key => $value) {
-            $data[] = array(
+            $data[] = [
                 'ID' => 'UUID()',
                 'ID_USER' => $this->db->escape($id_user),
                 'ID_HELP_TYPE' => $this->db->escape($value),
                 'STATUS' => 1
-            );
+            ];
         }
 
         return $this->db->insert_batch('USER_HELP_CONF', $data, false);
@@ -49,11 +66,11 @@ class M_config extends TDB_Model
      *
      * @return mixed result of query
      */
-    public function update($id_user, $type_change = array())
+    public function update(string $id_user, array $type_change = [])
     {
         $query = 'UPDATE `USER_HELP_CONF` SET `STATUS` = CASE';
-        $id_user_array = array();
-        $id_help_type_array = array();
+        $id_user_array = [];
+        $id_help_type_array = [];
         foreach ($type_change as $key => $value) {
             $id_user_array[] = $this->db->escape($id_user);
             $id_help_type_array[] = $this->db->escape($value['ID_HELP_TYPE']);

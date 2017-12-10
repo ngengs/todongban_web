@@ -1,4 +1,21 @@
 <?php
+/**
+ * Copyright (c) 2017 Rizky Kharisma (@ngengs)
+ *
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /*
@@ -39,7 +56,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |  $autoload['packages'] = array(APPPATH.'third_party', '/usr/local/shared');
 |
 */
-$autoload['packages'] = array();
+$autoload['packages'] = [];
 
 /*
 | -------------------------------------------------------------------
@@ -58,7 +75,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array();
+$autoload['libraries'] = [];
 
 /*
 | -------------------------------------------------------------------
@@ -79,7 +96,7 @@ $autoload['libraries'] = array();
 |	$autoload['drivers'] = array('cache' => 'cch');
 |
 */
-$autoload['drivers'] = array();
+$autoload['drivers'] = [];
 
 /*
 | -------------------------------------------------------------------
@@ -89,7 +106,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('url');
+$autoload['helper'] = ['url'];
 
 /*
 | -------------------------------------------------------------------
@@ -103,7 +120,7 @@ $autoload['helper'] = array('url');
 | config files.  Otherwise, leave it blank.
 |
 */
-$autoload['config'] = array('web_config');
+$autoload['config'] = ['web_config'];
 
 /*
 | -------------------------------------------------------------------
@@ -117,7 +134,7 @@ $autoload['config'] = array('web_config');
 | "codeigniter_lang.php" would be referenced as array('codeigniter');
 |
 */
-$autoload['language'] = array();
+$autoload['language'] = [];
 
 /*
 | -------------------------------------------------------------------
@@ -132,7 +149,7 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array();
+$autoload['model'] = [];
 
 /*
 | -------------------------------------------------------------------
@@ -140,8 +157,8 @@ $autoload['model'] = array();
 | -------------------------------------------------------------------
 |
  */
-$tag_autoload['config'] = array('tag_key', 'tag_value', 'tag_status_code');
+$tag_autoload['config'] = ['tag_key', 'tag_value', 'tag_status_code'];
 foreach ($tag_autoload['config'] as $key => $value) {
-	/** @noinspection PhpIncludeInspection */
-	require_once (APPPATH . 'config/' . $value . '.php');
+    /** @noinspection PhpIncludeInspection */
+    require_once(APPPATH . 'config/' . $value . '.php');
 }
