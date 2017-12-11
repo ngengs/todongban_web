@@ -94,6 +94,7 @@ class M_config extends TDB_Model
         $this->db->select('USER_HELP_CONF.ID, USER_HELP_CONF.ID_USER, USER_HELP_CONF.ID_HELP_TYPE, USER_HELP_CONF.STATUS, HELP_TYPE.NAME, HELP_TYPE.VEHICLE');
         $this->db->where('ID_USER', $id_user);
         $this->db->join('HELP_TYPE', 'HELP_TYPE.ID=USER_HELP_CONF.ID_HELP_TYPE', 'LEFT');
+        $this->db->order_by('HELP_TYPE.VEHICLE', 'ASC');
         $this->db->from('USER_HELP_CONF');
         $result = $this->db->get();
 
