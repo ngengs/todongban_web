@@ -105,7 +105,7 @@ class User extends TDB_Controller
     {
         $this->log->write_log('debug', $this->TAG . ': validate: ');
         $user = $this->get_user();
-        $this->m_user->update_status($id, 1, $user->ID);
+        $this->m_user->update_status($id, User_data::$STATUS_ACTIVE, $user->ID);
         redirect('admin/manage/user/detail/' . $id);
     }
 
@@ -113,8 +113,15 @@ class User extends TDB_Controller
     {
         $this->log->write_log('debug', $this->TAG . ': validate: ');
         $user = $this->get_user();
-        $this->m_user->update_status($id, 4, $user->ID);
+        $this->m_user->update_status($id, User_data::$STATUS_BANNED, $user->ID);
         redirect('admin/manage/user/detail/' . $id);
+    }
+
+    public function test($id){
+        $this->load->model('m_config');
+
+        $this->output->set_content_type('application/json');
+        echo json_encode($this->m_config->get($id));
     }
 
 

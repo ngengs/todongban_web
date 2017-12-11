@@ -84,6 +84,15 @@ class M_user extends TDB_Model
         return $cas_use;
     }
 
+    /**
+     * @param null|string $username
+     * @param null|string $device_id
+     * @param null $status
+     * @param null|string $id
+     * @param null $type
+     *
+     * @return \User_data[]
+     */
     public function get(?string $username = null, ?string $device_id = null, $status = null, ?string $id = null,
         $type = null)
     {
@@ -114,7 +123,7 @@ class M_user extends TDB_Model
         $this->db->from('USER');
         $result = $this->db->get();
 
-        return $result->result();
+        return $result->result('User_data');
     }
 
     public function count_not_active(): int

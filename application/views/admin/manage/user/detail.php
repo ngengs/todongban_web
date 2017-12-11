@@ -24,6 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 2:34 AM
  *
  * Created by PhpStorm.
+ * @var \User_data $registered
  */
 ?>
 <div class="row">
@@ -41,16 +42,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             <p class="form-control-static">
                                 <?php
                                 switch ($registered->STATUS) {
-                                    case 1:
+                                    case User_data::$STATUS_ACTIVE:
                                         echo "<span class='label label-success'>Aktif</span>";
                                         break;
-                                    case 2:
+                                    case User_data::$STATUS_NOT_ACTIVE:
                                         echo "<span class='label label-default'>Dalam Proses Verifikasi</span>";
                                         break;
-                                    case 3:
+                                    case User_data::$STATUS_REJECTED:
                                         echo "<span class='label label-warning'>Pendaftaran Tertolak</span>";
                                         break;
-                                    case 4:
+                                    case User_data::$STATUS_BANNED:
                                         echo "<span class='label label-danger'>Sedang di Blokir</span>";
                                         break;
                                 }
@@ -92,8 +93,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="form-group">
                         <label class="col-sm-2 control-label">Jenis Kelamin</label>
                         <div class="col-sm-10">
-                            <p class="form-control-static"><?php echo ($registered->GENDER == 1) ? 'Laki-laki' :
-                                    'Perempuan';
+                            <p class="form-control-static"><?php echo ($registered->GENDER == User_data::$GENDER_MALE)
+                                    ? 'Laki-laki' : 'Perempuan';
                                 ?></p>
                         </div>
                     </div>
@@ -144,25 +145,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <?php } ?>
                 </div>
                 <div class="box-footer text-right">
-                    <?php if ($from_validation && ($registered->STATUS == 3)) { ?>
+                    <?php if ($from_validation && ($registered->STATUS == User_data::$STATUS_REJECTED)) { ?>
                         <a href="<?php echo base_url('admin/manage/register/validate/' . $registered->ID); ?>"
                            class="btn btn-warning">Perbaharui data</a>
                     <?php } ?>
-                    <?php if ($from_validation && ($registered->STATUS == 2)) { ?>
-                        <a href="#"
-                           class="btn
-                    btn-danger">Tolak</a>
+                    <?php if ($from_validation && ($registered->STATUS == User_data::$STATUS_NOT_ACTIVE)) { ?>
+                        <a href="#" class="btn btn-danger">Tolak</a>
                         <a href="<?php echo base_url('admin/manage/register/validate/' . $registered->ID); ?>"
                            class="btn btn-success">Validasi</a>
                     <?php } ?>
-                    <?php if (!$from_validation && ($registered->STATUS == 1 || $registered->STATUS == 4)) { ?>
+                    <?php if (!$from_validation
+                              && ($registered->STATUS == User_data::$STATUS_ACTIVE
+                                  || $registered->STATUS == User_data::$STATUS_BANNED)) { ?>
                         <a href="#" class="btn btn-danger">Hapus</a>
                     <?php } ?>
-                    <?php if (!$from_validation && ($registered->STATUS == 4)) { ?>
+                    <?php if (!$from_validation && ($registered->STATUS == User_data::$STATUS_BANNED)) { ?>
                         <a href="<?php echo base_url('admin/manage/user/unbanned/' . $registered->ID); ?>" class="btn
                         btn-success">Cabut Blokir</a>
                     <?php } ?>
-                    <?php if (!$from_validation && ($registered->STATUS == 1)) { ?>
+                    <?php if (!$from_validation && ($registered->STATUS == User_data::$STATUS_ACTIVE)) { ?>
                         <a href="<?php echo base_url('admin/manage/user/banned/' . $registered->ID); ?>" class="btn
                         btn-warning">Blokir</a>
                     <?php } ?>

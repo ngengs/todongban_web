@@ -78,7 +78,7 @@ class Auth extends TDB_Controller
             if (!empty($user)) {
                 $user = $user[0];
                 if (password_verify($password, $user->PASSWORD)) {
-                    if ($user->TYPE == -1 && $user->STATUS == 1) {
+                    if ($user->TYPE == User_data::$TYPE_ADMIN && $user->STATUS == User_data::$STATUS_ACTIVE) {
                         $this->session->set_userdata('session_user', $user->USERNAME);
 
                         if (!empty($data['next'])) {

@@ -84,4 +84,20 @@ class M_config extends TDB_Model
         return $this->db->simple_query($query);
     }
 
+    /**
+     * @param string $id_user
+     *
+     * @return \Config_data[] Array of config data
+     */
+    public function get(string $id_user)
+    {
+        $this->db->select('USER_HELP_CONF.ID, USER_HELP_CONF.ID_USER, USER_HELP_CONF.ID_HELP_TYPE, USER_HELP_CONF.STATUS, HELP_TYPE.NAME, HELP_TYPE.VEHICLE');
+        $this->db->where('ID_USER', $id_user);
+        $this->db->join('HELP_TYPE', 'HELP_TYPE.ID=USER_HELP_CONF.ID_HELP_TYPE', 'LEFT');
+        $this->db->from('USER_HELP_CONF');
+        $result = $this->db->get();
+
+        return $result->result('Config_data');
+    }
+
 }

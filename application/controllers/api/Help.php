@@ -37,6 +37,7 @@ class Help extends TDB_Controller
 
     /**
      * @throws \BadFunctionCallException
+     * @throws \Exception
      */
     public function request_post()
     {
@@ -78,7 +79,7 @@ class Help extends TDB_Controller
         }
         $user = $this->get_user();
         $this->load->model('m_help');
-        $result = $this->m_help->cancel_request($id_request, $user->ID);
+        $this->m_help->cancel_request($id_request, $user->ID);
         $this->response(null);
     }
 

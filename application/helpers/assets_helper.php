@@ -69,13 +69,20 @@ if (!function_exists('js_plugin_url')) {
 }
 
 if (!function_exists('avatar_user_url')) {
-    function avatar_user_url($user = null)
+    /**
+     * @param \User_data $user
+     */
+    function avatar_user_url($user)
     {
         echo base_url('uploads/' . $user->USERNAME . '/' . $user->AVATAR);
     }
 }
 if (!function_exists('identity_user_url')) {
-    function identity_user_url($user = null)
+
+    /**
+     * @param \User_data $user
+     */
+    function identity_user_url($user)
     {
         echo base_url('uploads/' . $user->USERNAME . '/' . $user->IDENTITY_PICTURE);
     }

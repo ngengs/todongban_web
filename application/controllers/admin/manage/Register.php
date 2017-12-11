@@ -29,6 +29,7 @@ class Register extends TDB_Controller
 
     /**
      * Register constructor.
+     * @throws \BadFunctionCallException
      */
     public function __construct()
     {
@@ -48,7 +49,7 @@ class Register extends TDB_Controller
         $data['title'] = 'Validasi';
         $data['menu'] = 20;
         $data['breadcrumb'] = [['title' => 'validasi']];
-        $data['registered'] = $this->m_user->get(null, null, 2);
+        $data['registered'] = $this->m_user->get(null, null, User_data::$STATUS_NOT_ACTIVE);
         $this->load->view('admin/base/header', $data);
         $this->load->view('admin/manage/register/validation_list', $data);
         $this->load->view('admin/base/footer', $data);
@@ -63,7 +64,7 @@ class Register extends TDB_Controller
     {
         $this->log->write_log('debug', $this->TAG . ': validate: ');
         $user = $this->get_user();
-        $result = $this->m_user->update_status($id, 1, $user->ID);
+        $result = $this->m_user->update_status($id, User_data::$STATUS_ACTIVE, $user->ID);
         if ($result) {
             $registered = $this->m_user->get(null, null, null, $id);
             $this->log->write_log('debug', $this->TAG . ': validate: user:' . json_encode($registered));

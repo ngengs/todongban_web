@@ -162,3 +162,8 @@ foreach ($tag_autoload['config'] as $key => $value) {
     /** @noinspection PhpIncludeInspection */
     require_once(APPPATH . 'config/' . $value . '.php');
 }
+
+$object_data_autoload['config'] = ['Base_data','User_data', 'Garage_data', 'Config_data'];
+foreach ($object_data_autoload['config'] as $key => $value) {
+    require_once(APPPATH . 'objects/' . $value . '.php');
+}

@@ -43,11 +43,11 @@ class M_help extends TDB_Model
      * @param float $latitude user last position Latitude
      * @param float $longitude user last position Longitude
      *
-     * @param String $id_help_type
+     * @param string $id_help_type
      * @param null|string $message
      * @param null|string $location_name
      *
-     * @return bool result of query
+     * @return string|null Inserted ID
      * @throws \Exception
      */
     public function insert_request(string $id_user, float $latitude, float $longitude, String $id_help_type,
@@ -72,14 +72,13 @@ class M_help extends TDB_Model
         $this->set_creator($id_user, $date);
         $this->set_updater($id_user, $date);
         $this->db->from('HELP_REQUEST');
-        $query_insert = $this->db->get_compiled_insert();
+        $result = $this->db->insert();
 
-//		Run transaction
-        $this->db->trans_start();
-        $this->db->query($query_insert);
-        $this->db->trans_complete();
-
-        return $id;
+        if (!empty($result)) {
+            return $id;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -99,6 +98,5 @@ class M_help extends TDB_Model
         $result = $this->db->update();
 
         return $result;
-
     }
 }

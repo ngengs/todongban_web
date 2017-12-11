@@ -35,9 +35,31 @@ class Config extends TDB_Controller
         parent::__construct(true);
     }
 
+    /**
+     * @throws \BadFunctionCallException
+     */
     public function index_get()
     {
+        if (!$this->check_access()) {
+            $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Not authorized');
+        }
+        $user = $this->get_user();
+        $this->load->model('m_config');
+//        $configs = $this->m_config->get('161b099a-dd4a-11e7-9003-68f7286287bc');
+        $configs = $this->m_config->get($user->ID);
+        $data = null;
+        if(!empty($configs)){
+            $data = [];
+            foreach ($configs as $config) {
+                $data[] = [
+                  'id_help_type' => $config->ID_HELP_TYPE,
+                  'vehicle' => (int) $config->VEHICLE,
+                  'status' => (int) $config->STATUS
+                ];
+            }
+        }
 
+        $this->response($data);
     }
 
     /**

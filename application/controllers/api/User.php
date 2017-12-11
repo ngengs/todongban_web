@@ -60,11 +60,11 @@ class User extends TDB_Controller
             $this->response_error(STATUS_CODE_NOT_FOUND, 'Data not complete');
         }
         $this->load->model('m_user');
-        $user = $this->m_user->get($username);
-        if (empty($user)) {
+        $users = $this->m_user->get($username);
+        if (empty($users)) {
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Username not found');
         }
-        $user = $user[0];
+        $user = $users[0];
         if (!password_verify($password, $user->PASSWORD)) {
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Username and password not match');
         }
@@ -73,7 +73,7 @@ class User extends TDB_Controller
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Something wrong with server');
         }
         $user->DEVICE_ID = $device_id;
-        if ($user->TYPE == -1) {
+        if ($user->TYPE == User_data::$TYPE_ADMIN) {
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Hanya untuk pengguna');
         }
 

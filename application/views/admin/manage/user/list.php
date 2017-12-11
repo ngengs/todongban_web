@@ -24,6 +24,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 2:34 AM
  *
  * Created by PhpStorm.
+ *
+ * @var \User_data[] $users
  */
 ?>
 <div class="row">
@@ -49,14 +51,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php
                         if (!empty($users)) {
                             $i = 1;
-                            foreach ($users as $key => $value) { ?>
+                            foreach ($users as $user) { ?>
                                 <tr>
                                     <td><?php echo $i++; ?></td>
-                                    <td><?php echo $value->FULL_NAME; ?></td>
-                                    <td><?php echo $value->EMAIL; ?></td>
-                                    <td><?php echo ($value->TYPE == 1)?'Personal':'Bengkel'; ?></td>
-                                    <td><?php echo date('Y-MM-d h:i', strtotime($value->DATE_CREATE)); ?></td>
-                                    <td><a href="<?php echo base_url('admin/manage/user/detail/' . $value->ID); ?>"
+                                    <td><?php echo $user->FULL_NAME; ?></td>
+                                    <td><?php echo $user->EMAIL; ?></td>
+                                    <td><?php echo ($user->TYPE == User_data::$TYPE_PERSONAL)?'Personal':'Bengkel'; ?></td>
+                                    <td><?php echo date('Y-M-d h:i', strtotime($user->DATE_CREATE)); ?></td>
+                                    <td><a href="<?php echo base_url('admin/manage/user/detail/' . $user->ID); ?>"
                                            class="btn btn-warning btn-sm">
                                             <span class="fa fa-eye"></span> Detail</a>
                                     </td>

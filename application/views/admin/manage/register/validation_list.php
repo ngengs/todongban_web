@@ -24,6 +24,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Time: 2:34 AM
  *
  * Created by PhpStorm.
+ *
+ * @var \User_data[] $registered
  */
 ?>
 <div class="row">
@@ -53,7 +55,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     <td><?php echo $i++; ?></td>
                                     <td><?php echo $value->FULL_NAME; ?></td>
                                     <td><?php echo $value->EMAIL; ?></td>
-                                    <td><?php echo date('Y-MM-d h:i', strtotime($value->DATE_CREATE)); ?></td>
+                                    <td><?php echo date('Y-M-d h:i', strtotime($value->DATE_CREATE)); ?></td>
                                     <td><a href="<?php echo base_url('admin/manage/user/detail/'
                                                                      . $value->ID.'/validation'); ?>"
                                            class="btn btn-warning btn-sm">

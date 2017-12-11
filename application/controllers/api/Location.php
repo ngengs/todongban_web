@@ -45,6 +45,7 @@ class Location extends TDB_Controller
      * double latitude position latitude
      * double longtitude position longtitude
      * @throws \BadFunctionCallException
+     * @throws \Exception
      */
     public function index_post()
     {

@@ -36,7 +36,9 @@ use Firebase\JWT\JWT;
 class TDB_Controller extends CI_Controller
 {
     private $TAG = 'TDB_Controller';
+    /** @var bool */
     private $api_controller;
+    /** @var \User_data */
     private $user;
 
     /**
@@ -60,7 +62,7 @@ class TDB_Controller extends CI_Controller
     /**
      * Function to get user active data.
      *
-     * @return null|object User data
+     * @return null|\User_data User data
      */
     protected function get_user()
     {
@@ -110,11 +112,13 @@ class TDB_Controller extends CI_Controller
 
         if (!empty($this->user)) {
             if ($this->api_controller) {
-                if ($this->user->STATUS == 1 && ($this->user->TYPE == 1 || $this->user->TYPE == 2)) {
+                if ($this->user->STATUS == User_data::$STATUS_ACTIVE
+                    && ($this->user->TYPE == User_data::$TYPE_PERSONAL
+                        || $this->user->TYPE == User_data::$TYPE_GARAGE)) {
                     $can_access = true;
                 }
             } else {
-                if ($this->user->STATUS == 1 && $this->user->TYPE == -1) {
+                if ($this->user->STATUS == User_data::$STATUS_ACTIVE && $this->user->TYPE == User_data::$TYPE_ADMIN) {
                     $can_access = true;
                 }
             }
@@ -157,12 +161,12 @@ class TDB_Controller extends CI_Controller
     }
 
     /**
-     * Function to check if token have active user (useername & device id is match)
+     * Function to check if token have active user (username & device id is match)
      *
      * @param string $username Username to check
      * @param string $device_id Device ID to check
      *
-     * @return array User data
+     * @return null|\User_data User Data
      * @throws \BadFunctionCallException if call from non API controller
      */
     private function check_token_data(string $username, string $device_id)
@@ -172,12 +176,12 @@ class TDB_Controller extends CI_Controller
             throw new BadFunctionCallException('Only for API type controller');
         }
         $this->load->model('m_user');
-        $user = $this->m_user->get($username, $device_id);
-        if (!empty($user)) {
-            $user = $user[0];
+        $users = $this->m_user->get($username, $device_id);
+        if (!empty($users)) {
+            return $users[0];
+        } else {
+            return null;
         }
-
-        return $user;
     }
 
     /**
@@ -215,8 +219,8 @@ class TDB_Controller extends CI_Controller
      *
      * @throws \BadFunctionCallException if call from non API controller
      */
-    protected function response($data, $status = VALUE_STATUS_OK, $code = STATUS_CODE_SUCCESS,
-        $message = VALUE_STATUS_MESSAGE_DEFAULT)
+    protected function response($data, ?string $status = VALUE_STATUS_OK, ?int $code = STATUS_CODE_SUCCESS,
+        ?string $message = VALUE_STATUS_MESSAGE_DEFAULT)
     {
         $this->log->write_log('debug', $this->TAG . ': response: ');
         if (!$this->api_controller) {
@@ -271,7 +275,7 @@ class TDB_Controller extends CI_Controller
      * @param string $status_message Status message
      * @param int $header_code Status code in header
      */
-    protected function response_error($status_code, $status_message, $header_code = 500)
+    protected function response_error(?int $status_code, ?string $status_message, ?int $header_code = 500)
     {
         $this->log->write_log('debug', $this->TAG . ': response_error: ');
         if ($this->api_controller) {
@@ -327,7 +331,7 @@ class TDB_Controller extends CI_Controller
      * @throws \Exception If private key not exist
      * @throws \LogicException if failed read private key
      */
-    protected function create_token($data = null)
+    protected function create_token(?array $data = null)
     {
         $this->log->write_log('debug', $this->TAG . ': create_token: ');
         if (!$this->api_controller) {
@@ -374,7 +378,7 @@ class TDB_Controller extends CI_Controller
      * @throws \Exception if public key not exist
      * @throws \LogicException if failed read public key
      */
-    protected function read_token($jwt)
+    protected function read_token(string $jwt)
     {
         $this->log->write_log('debug', $this->TAG . ': read_token: ');
         if (!$this->api_controller) {
@@ -410,12 +414,12 @@ class TDB_Controller extends CI_Controller
      * @param string $status Status of response, OK for success and ERROR for error
      * @param int|null $code Status code of response, null if success and int if error
      * @param string|null $message Status message of response, null if success and string ig error
-     * @param mixed $data Data to send
+     * @param mixed|null $data Data to send
      *
      * @return array Generated response from parameter
      * @throws \BadFunctionCallException
      */
-    private function generate_response($status, $code, $message, $data)
+    private function generate_response(?string $status, ?int $code, ?string $message, $data)
     {
         $this->log->write_log('debug', $this->TAG . ': generate_response: ');
         if (!$this->api_controller) {
@@ -442,7 +446,7 @@ class TDB_Controller extends CI_Controller
      *
      * @throws \BadFunctionCallException
      */
-    private function send($status_code, $response, $custom_header = [])
+    private function send(?int $status_code, array $response, ?array $custom_header = [])
     {
         $this->log->write_log('debug', $this->TAG . ': send: ' . $status_code . ', response_status: ');
         if (!$this->api_controller) {
@@ -460,7 +464,7 @@ class TDB_Controller extends CI_Controller
         die;
     }
 
-    protected function send_email($to, $subject, $message)
+    protected function send_email(string $to, string $subject, string $message)
     {
         $this->log->write_log('debug',
                               $this->TAG . ': send_email: to:' . $to . ' subject:' . $subject . ' host:'
