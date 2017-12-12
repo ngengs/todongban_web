@@ -38,7 +38,7 @@ class Base_data
      */
     public $DATE_CREATE;
     /**
-     * @var null|string  $ID_UPDATE Not all object have this, please make sure to check before use this
+     * @var null|string $ID_UPDATE Not all object have this, please make sure to check before use this
      */
     public $ID_UPDATE;
     /**
@@ -49,5 +49,18 @@ class Base_data
      * @var int $STATUS
      */
     public $STATUS;
+
+    public function __cast()
+    {
+        if (!is_null($this->STATUS)) {
+            $this->STATUS = (int)$this->STATUS;
+        }
+    }
+
+    public function __toString()
+    {
+        return json_encode($this);
+    }
+
 
 }

@@ -51,4 +51,17 @@ class Config_data extends Base_data
      */
     public $VEHICLE;
 
+    public function __cast()
+    {
+        $this->STATUS = null;
+        parent::__cast();
+        $this->VEHICLE = (int) $this->VEHICLE;
+    }
+
+    public function __toString()
+    {
+        return json_encode($this);
+    }
+
+
 }

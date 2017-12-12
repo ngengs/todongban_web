@@ -306,17 +306,17 @@ class User extends TDB_Controller
                     'username' => $user->USERNAME,
                     'email' => $user->EMAIL,
                     'full_name' => $user->FULL_NAME,
-                    'gender' => (int)$user->GENDER,
-                    'status' => (int)$user->STATUS,
-                    'type' => (int)$user->TYPE
+                    'gender' => $user->GENDER,
+                    'status' => $user->STATUS,
+                    'type' => $user->TYPE
                 ];
             }
         } else {
             if (!empty($user)) {
                 $status = [
                     'username' => $user->USERNAME,
-                    'status' => (int)$user->STATUS,
-                    'type' => (int)$user->TYPE
+                    'status' => $user->STATUS,
+                    'type' => $user->TYPE
                 ];
             }
         }

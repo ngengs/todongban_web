@@ -66,7 +66,7 @@ class TDB_Controller extends CI_Controller
      */
     protected function get_user()
     {
-        $this->log->write_log('debug', $this->TAG . ': get_user: ');
+        $this->log->write_log('debug', $this->TAG . ': get_user: ' . $this->user);
 
         return $this->user;
     }
@@ -91,7 +91,6 @@ class TDB_Controller extends CI_Controller
                 $data = $this->extract_data_from_token($token);
                 if (is_array($data) && count($data) == 2) {
                     $user = $this->check_token_data($data[0], $data[1]);
-                    $this->log->write_log('debug', $this->TAG . ': test: ' . json_encode($user));
                 }
             } else {
                 $username = $this->session->userdata('session_user');
@@ -107,6 +106,7 @@ class TDB_Controller extends CI_Controller
             if (!empty($user)) {
                 unset($user->PASSWORD);
                 $this->user = $user;
+                $this->user->__cast();
             }
         }
 

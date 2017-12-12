@@ -125,4 +125,17 @@ class User_data extends Base_data
      */
     public $TYPE;
 
+    public function __cast()
+    {
+        parent::__cast();
+        $this->GENDER = (int) $this->GENDER;
+        $this->TYPE = (int) $this->TYPE;
+    }
+
+    public function __toString()
+    {
+        return json_encode($this);
+    }
+
+
 }

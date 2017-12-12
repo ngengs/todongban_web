@@ -48,13 +48,14 @@ class Config extends TDB_Controller
 //        $configs = $this->m_config->get('161b099a-dd4a-11e7-9003-68f7286287bc');
         $configs = $this->m_config->get($user->ID);
         $data = null;
-        if(!empty($configs)){
+        if (!empty($configs)) {
             $data = [];
             foreach ($configs as $config) {
+                $config->__cast();
                 $data[] = [
-                  'id_help_type' => $config->ID_HELP_TYPE,
-                  'vehicle' => (int) $config->VEHICLE,
-                  'status' => (int) $config->STATUS
+                    'id_help_type' => $config->ID_HELP_TYPE,
+                    'vehicle' => $config->VEHICLE,
+                    'status' => $config->STATUS
                 ];
             }
         }

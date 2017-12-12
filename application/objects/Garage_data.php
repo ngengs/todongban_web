@@ -58,4 +58,18 @@ class Garage_data extends Base_data
         return ($this->FORCE_CLOSE == 1);
     }
 
+    public function __cast()
+    {
+        parent::__cast();
+        $this->LATITUDE = (float) $this->LATITUDE;
+        $this->LONGITUDE = (float) $this->LONGITUDE;
+        $this->FORCE_CLOSE = (int) $this->FORCE_CLOSE;
+    }
+
+    public function __toString()
+    {
+        return json_encode($this);
+    }
+
+
 }
