@@ -60,7 +60,6 @@ class Base_data
     public function __toString()
     {
         return json_encode($this);
-
     }
 
 
