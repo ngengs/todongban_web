@@ -25,8 +25,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Garage_data extends Base_data
 {
-    private $TAG = 'Garage_data';
-
     /**
      * @var string $NAME
      */

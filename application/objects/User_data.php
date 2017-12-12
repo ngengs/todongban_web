@@ -25,9 +25,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class User_data extends Base_data
 {
-    private $TAG = 'User_data';
-
-
     /**
      * @var int $TYPE_ADMIN User Type Admin Value
      */
