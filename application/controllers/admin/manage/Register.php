@@ -49,7 +49,16 @@ class Register extends TDB_Controller
         $data['title'] = 'Validasi';
         $data['menu'] = 20;
         $data['breadcrumb'] = [['title' => 'validasi']];
-        $data['registered'] = $this->m_user->get(null, null, User_data::$STATUS_NOT_ACTIVE);
+        $data['registered_garage'] = $this->m_user->get(null,
+                                                        null,
+                                                        User_data::$STATUS_NOT_ACTIVE,
+                                                        null,
+                                                        User_data::$TYPE_GARAGE);
+        $data['registered_personal'] = $this->m_user->get(null,
+                                                          null,
+                                                          User_data::$STATUS_NOT_ACTIVE,
+                                                          null,
+                                                          User_data::$TYPE_PERSONAL);
         $this->load->view('admin/base/header', $data);
         $this->load->view('admin/manage/register/validation_list', $data);
         $this->load->view('admin/base/footer', $data);

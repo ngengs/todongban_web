@@ -25,14 +25,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Created by PhpStorm.
  *
- * @var \User_data[] $users
+ * @var \User_data[] $users_personal
+ * @var \User_data[] $users_garage
  */
 ?>
 <div class="row">
     <div class="col-sm-12">
         <div class="box box-danger">
             <div class="box-header">
-                <h3 class="box-title">Pendaftar</h3>
+                <h3 class="box-title">Pendaftar Bengkel</h3>
             </div>
             <div class="box-body">
                 <div class="table-responsive">
@@ -49,14 +50,63 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </thead>
                         <tbody>
                         <?php
-                        if (!empty($users)) {
+                        if (!empty($users_garage)) {
                             $i = 1;
-                            foreach ($users as $user) { ?>
+                            foreach ($users_garage as $user) {
+                                $user->__cast();
+                                ?>
                                 <tr>
                                     <td><?php echo $i++; ?></td>
                                     <td><?php echo $user->FULL_NAME; ?></td>
                                     <td><?php echo $user->EMAIL; ?></td>
-                                    <td><?php echo ($user->TYPE == User_data::$TYPE_PERSONAL)?'Personal':'Bengkel'; ?></td>
+                                    <td><?php echo ($user->TYPE == User_data::$TYPE_PERSONAL) ? 'Personal'
+                                            : 'Bengkel'; ?></td>
+                                    <td><?php echo date('Y-M-d h:i', strtotime($user->DATE_CREATE)); ?></td>
+                                    <td><a href="<?php echo base_url('admin/manage/user/detail/' . $user->ID); ?>"
+                                           class="btn btn-warning btn-sm">
+                                            <span class="fa fa-eye"></span> Detail</a>
+                                    </td>
+                                </tr>
+                            <?php }
+                        } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="box box-danger">
+            <div class="box-header">
+                <h3 class="box-title">Pendaftar Personal</h3>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table data-table">
+                        <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Tipe</th>
+                            <th>Waktu Daftar</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        if (!empty($users_personal)) {
+                            $i = 1;
+                            foreach ($users_personal as $user) {
+                                $user->__cast();
+                                ?>
+                                <tr>
+                                    <td><?php echo $i++; ?></td>
+                                    <td><?php echo $user->FULL_NAME; ?></td>
+                                    <td><?php echo $user->EMAIL; ?></td>
+                                    <td><?php echo ($user->TYPE == User_data::$TYPE_PERSONAL) ? 'Personal'
+                                            : 'Bengkel'; ?></td>
                                     <td><?php echo date('Y-M-d h:i', strtotime($user->DATE_CREATE)); ?></td>
                                     <td><a href="<?php echo base_url('admin/manage/user/detail/' . $user->ID); ?>"
                                            class="btn btn-warning btn-sm">

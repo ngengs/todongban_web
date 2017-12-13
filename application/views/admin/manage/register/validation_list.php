@@ -25,14 +25,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Created by PhpStorm.
  *
- * @var \User_data[] $registered
+ * @var \User_data[] $registered_personal
+ * @var \User_data[] $registered_garage
  */
 ?>
 <div class="row">
     <div class="col-sm-12">
         <div class="box box-danger">
             <div class="box-header">
-                <h3 class="box-title">Pendaftar</h3>
+                <h3 class="box-title">Pendaftar Bengkel</h3>
             </div>
             <div class="box-body">
                 <div class="table-responsive">
@@ -48,16 +49,59 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </thead>
                         <tbody>
                         <?php
-                        if (!empty($registered)) {
+                        if (!empty($registered_garage)) {
                             $i = 1;
-                            foreach ($registered as $key => $value) { ?>
+                            foreach ($registered_garage as $key => $value) {
+                                $value->__cast();
+                                ?>
+                                <tr>
+                                    <td><?php echo $i++; ?></td>
+                                    <td><?php echo $value->FULL_NAME; ?></td>
+                                    <td><?php echo $value->EMAIL; ?></td>
+                                    <td><?php echo date('Y-M-d h:i', strtotime($value->DATE_CREATE)); ?></td>
+                                    <td><a href="<?php echo base_url('admin/manage/user/detail/' . $value->ID
+                                                                     . '/validation'); ?>"
+                                           class="btn btn-warning btn-sm"> <span class="fa fa-eye"></span> Detail</a>
+                                    </td>
+                                </tr>
+                            <?php }
+                        } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+    <div class="col-sm-12">
+        <div class="box box-danger">
+            <div class="box-header">
+                <h3 class="box-title">Pendaftar Personal</h3>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table data-table">
+                        <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Waktu Daftar</th>
+                            <th>Aksi</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                        if (!empty($registered_personal)) {
+                            $i = 1;
+                            foreach ($registered_personal as $key => $value) { ?>
                                 <tr>
                                     <td><?php echo $i++; ?></td>
                                     <td><?php echo $value->FULL_NAME; ?></td>
                                     <td><?php echo $value->EMAIL; ?></td>
                                     <td><?php echo date('Y-M-d h:i', strtotime($value->DATE_CREATE)); ?></td>
                                     <td><a href="<?php echo base_url('admin/manage/user/detail/'
-                                                                     . $value->ID.'/validation'); ?>"
+                                                                     . $value->ID . '/validation'); ?>"
                                            class="btn btn-warning btn-sm">
                                             <span class="fa fa-eye"></span> Detail</a>
                                     </td>

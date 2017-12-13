@@ -42,7 +42,10 @@ class User extends TDB_Controller
         $data['title'] = 'Pengguna';
         $data['menu'] = 30;
         $data['breadcrumb'] = [['title' => 'pengguna']];
-        $data['users'] = $this->m_user->get(null, null, 1, 1, [1, 2]);
+        $data['users_garage'] =
+            $this->m_user->get(null, null, User_data::$STATUS_ACTIVE, null, User_data::$TYPE_GARAGE);
+        $data['users_personal'] =
+            $this->m_user->get(null, null, User_data::$STATUS_ACTIVE, null, User_data::$TYPE_PERSONAL);
         $this->load->view('admin/base/header', $data);
         $this->load->view('admin/manage/user/list', $data);
         $this->load->view('admin/base/footer', $data);
@@ -54,7 +57,10 @@ class User extends TDB_Controller
         $data['title'] = 'Pengguna Terblokir';
         $data['menu'] = 31;
         $data['breadcrumb'] = [['title' => 'pengguna']];
-        $data['users'] = $this->m_user->get(null, null, 4, 1, [1, 2]);
+        $data['users_garage'] =
+            $this->m_user->get(null, null, User_data::$STATUS_BANNED, null, User_data::$TYPE_GARAGE);
+        $data['users_personal'] =
+            $this->m_user->get(null, null, User_data::$STATUS_BANNED, null, User_data::$TYPE_PERSONAL);
         $this->load->view('admin/base/header', $data);
         $this->load->view('admin/manage/user/list', $data);
         $this->load->view('admin/base/footer', $data);
@@ -64,9 +70,15 @@ class User extends TDB_Controller
     {
         $from_validation = (strtolower($validation) == 'validation');
         $this->log->write_log('debug', $this->TAG . ': validation_detail: ');
-        $registered = $this->m_user->get(null, null, ($from_validation) ? [2, 3] : [1, 4], $id);
+        $registered = $this->m_user->get(null,
+                                         null,
+                                         ($from_validation) ?
+                                             [User_data::$STATUS_NOT_ACTIVE, User_data::$STATUS_REJECTED]
+                                             : [User_data::$STATUS_ACTIVE, User_data::$STATUS_BANNED],
+                                         $id);
         if (!empty($registered)) {
             $registered = $registered[0];
+            $registered->__cast();
             $data = $this->basic_data();
             $data['title'] = 'Pengguna';
             $data['sub_title'] = 'Detail';
@@ -84,6 +96,13 @@ class User extends TDB_Controller
                 if (!empty($last_update_by)) {
                     $data['last_update_by'] = $last_update_by[0]->FULL_NAME;
                 }
+            }
+            if ($registered->TYPE == User_data::$TYPE_GARAGE) {
+                $this->load->model('m_garage');
+                $registered_garages = $this->m_garage->get($registered->ID);
+                $registered_garage = $registered_garages[0];
+                $registered_garage->__cast();
+                $data['registered_garage'] = $registered_garage;
             }
             $data['registered'] = $registered;
             $this->load->view('admin/base/header', $data);
@@ -117,7 +136,8 @@ class User extends TDB_Controller
         redirect('admin/manage/user/detail/' . $id);
     }
 
-    public function test($id){
+    public function test($id)
+    {
         $this->load->model('m_config');
 
         $this->output->set_content_type('application/json');

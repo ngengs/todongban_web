@@ -25,13 +25,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  *
  * Created by PhpStorm.
  * @var \User_data $registered
+ * @var \Garage_data $registered_garage
+ * @var boolean $from_validation
  */
 ?>
 <div class="row">
     <div class="col-sm-12">
         <div class="box box-danger">
             <div class="box-header">
-                <h3 class="box-title">Pendaftar</h3>
+                <h3 class="box-title">Detail Pengguna</h3>
             </div>
             <div class="box-body">
                 <div class="form-horizontal">
@@ -144,30 +146,98 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </div>
                     <?php } ?>
                 </div>
-                <div class="box-footer text-right">
-                    <?php if ($from_validation && ($registered->STATUS == User_data::$STATUS_REJECTED)) { ?>
-                        <a href="<?php echo base_url('admin/manage/register/validate/' . $registered->ID); ?>"
-                           class="btn btn-warning">Perbaharui data</a>
-                    <?php } ?>
-                    <?php if ($from_validation && ($registered->STATUS == User_data::$STATUS_NOT_ACTIVE)) { ?>
-                        <a href="#" class="btn btn-danger">Tolak</a>
-                        <a href="<?php echo base_url('admin/manage/register/validate/' . $registered->ID); ?>"
-                           class="btn btn-success">Validasi</a>
-                    <?php } ?>
+            </div>
+
+            <?php if ($registered->TYPE == User_data::$TYPE_GARAGE) { ?>
+        </div>
+    </div>
+
+
+    <div class="col-sm-12">
+        <div class="box box-danger">
+            <div class="box-header">
+                <h3 class="box-title">Detail Bengkel</h3>
+            </div>
+            <div class="box-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Nama Bengkel</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static"><?php echo $registered_garage->NAME; ?></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Jam Buka</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <?php echo date('H:i', strtotime($registered_garage->OPEN_HOUR)); ?>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Jam Tutup</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <?php echo date('H:i', strtotime($registered_garage->CLOSE_HOUR)); ?>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Alamat</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static"><?php echo $registered_garage->ADDRESS; ?></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Lokasi</label>
+                        <div class="col-sm-10">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <iframe class="embed-responsive-item"
+                                        src="https://www.google.com/maps/embed/v1/place?key=<?php echo $this->config->item('maps_key',
+                                                                                                                           'sensitive'); ?>
+  &q=<?php echo $registered_garage->LATITUDE . ',' . $registered_garage->LONGITUDE; ?>"></iframe>
+                            </div>
+                        </div>
+                    </div>
                     <?php if (!$from_validation
                               && ($registered->STATUS == User_data::$STATUS_ACTIVE
                                   || $registered->STATUS == User_data::$STATUS_BANNED)) { ?>
-                        <a href="#" class="btn btn-danger">Hapus</a>
-                    <?php } ?>
-                    <?php if (!$from_validation && ($registered->STATUS == User_data::$STATUS_BANNED)) { ?>
-                        <a href="<?php echo base_url('admin/manage/user/unbanned/' . $registered->ID); ?>" class="btn
-                        btn-success">Cabut Blokir</a>
-                    <?php } ?>
-                    <?php if (!$from_validation && ($registered->STATUS == User_data::$STATUS_ACTIVE)) { ?>
-                        <a href="<?php echo base_url('admin/manage/user/banned/' . $registered->ID); ?>" class="btn
-                        btn-warning">Blokir</a>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Kondisi</label>
+                            <div class="col-sm-10">
+                                <p class="form-control-static"><?php echo $registered_garage->is_force_close()
+                                        ? "<span class='label label-danger'>Tutup Paksa</span>"
+                                        : "<span class='label label-default'>Mengikuti Jadwal Buka</span>";
+                                    ?></p>
+                            </div>
+                        </div>
                     <?php } ?>
                 </div>
+            </div>
+            <?php } ?>
+            <div class="box-footer text-right">
+                <?php if ($from_validation && ($registered->STATUS == User_data::$STATUS_REJECTED)) { ?>
+                    <a href="<?php echo base_url('admin/manage/register/validate/' . $registered->ID); ?>"
+                       class="btn btn-warning">Perbaharui data</a>
+                <?php } ?>
+                <?php if ($from_validation && ($registered->STATUS == User_data::$STATUS_NOT_ACTIVE)) { ?>
+                    <a href="#" class="btn btn-danger">Tolak</a>
+                    <a href="<?php echo base_url('admin/manage/register/validate/' . $registered->ID); ?>"
+                       class="btn btn-success">Validasi</a>
+                <?php } ?>
+                <?php if (!$from_validation
+                          && ($registered->STATUS == User_data::$STATUS_ACTIVE
+                              || $registered->STATUS == User_data::$STATUS_BANNED)) { ?>
+                    <a href="#" class="btn btn-danger">Hapus</a>
+                <?php } ?>
+                <?php if (!$from_validation && ($registered->STATUS == User_data::$STATUS_BANNED)) { ?>
+                    <a href="<?php echo base_url('admin/manage/user/unbanned/' . $registered->ID); ?>" class="btn
+                        btn-success">Cabut Blokir</a>
+                <?php } ?>
+                <?php if (!$from_validation && ($registered->STATUS == User_data::$STATUS_ACTIVE)) { ?>
+                    <a href="<?php echo base_url('admin/manage/user/banned/' . $registered->ID); ?>" class="btn
+                        btn-warning">Blokir</a>
+                <?php } ?>
             </div>
             <!-- /.box -->
         </div>

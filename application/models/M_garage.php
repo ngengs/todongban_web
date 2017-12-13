@@ -75,4 +75,22 @@ class M_garage extends TDB_Model
             return false;
         }
     }
+
+    /**
+     * @param null|string $user_id
+     *
+     * @return \Garage_data[]|null
+     */
+    public function get(?string $user_id)
+    {
+        $this->log->write_log('debug', $this->TAG . ': get: ' . $user_id);
+        $this->db->select('ID, NAME, OPEN_HOUR, CLOSE_HOUR, ADDRESS, LATITUDE, LONGITUDE, FORCE_CLOSE, ID_CREATE, DATE_CREATE, ID_UPDATE, DATE_UPDATE');
+        if (!empty($user_id)) {
+            $this->db->where('ID_USER', $user_id);
+        }
+        $this->db->from('GARAGE');
+        $result = $this->db->get();
+
+        return $result->result('Garage_data');
+    }
 }
