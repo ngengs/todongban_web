@@ -40,6 +40,8 @@ class Fcm
     const CODE_HELP_RESPONSE = 201;
     const CODE_HELP_SEARCH_GARAGE = 202;
     const CODE_HELP_SEARCH_PERSONAL = 203;
+    const CODE_HELP_RESPONSE_ACCEPTED = 204;
+    const CODE_HELP_RESPONSE_REJECTED = 205;
 
     /**
      * Fcm constructor.
@@ -57,14 +59,14 @@ class Fcm
      *
      * @return $this
      */
-    public function set_targets(?array $id): self
+    public function set_targets(array $id): self
     {
         $this->to = $id;
 
         return $this;
     }
 
-    public function set_target(?string $id): self
+    public function set_target(string $id): self
     {
         $this->to = $id;
 
@@ -112,6 +114,8 @@ class Fcm
             case self::CODE_REGISTER_REJECTED:
             case self::CODE_HELP_SEARCH_GARAGE:
             case self::CODE_HELP_SEARCH_PERSONAL:
+            case self::CODE_HELP_RESPONSE_ACCEPTED:
+            case self::CODE_HELP_RESPONSE_REJECTED:
                 $can_set = true;
                 break;
         }
@@ -138,7 +142,7 @@ class Fcm
         return $this;
     }
 
-    public function set_payload(string $key, string $value): self
+    public function set_payload(string $key, $value): self
     {
         $this->payload[$key] = $value;
 
