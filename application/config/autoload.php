@@ -163,7 +163,15 @@ foreach ($tag_autoload['config'] as $key => $value) {
     require_once(APPPATH . 'config/' . $value . '.php');
 }
 
-$object_data_autoload['config'] = ['Base_data','User_data', 'Garage_data', 'Config_data'];
+$object_data_autoload['config'] = [
+    'Base_data',
+    'User_data',
+    'Garage_data',
+    'Config_data',
+    'Nearby_data',
+    'Help_request_data',
+    'Help_response_data'
+];
 foreach ($object_data_autoload['config'] as $key => $value) {
     require_once(APPPATH . 'objects/' . $value . '.php');
 }

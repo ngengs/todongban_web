@@ -99,4 +99,27 @@ class M_help extends TDB_Model
 
         return $result;
     }
+
+    /**
+     * @param string $id_request
+     * @param string $id_user
+     *
+     * @return \Help_request_data[]
+     */
+    public function get_request(string $id_request, string $id_user)
+    {
+        $this->db->select('ID, ID_USER, ID_HELP_TYPE, MESSAGE, LATITUDE, LONGITUDE, LOCATION_NAME, ID_CREATE, DATE_CREATE, ID_UPDATE, DATE_UPDATE, STATUS');
+        $this->db->where('ID', $id_request);
+        $this->db->where('ID_user', $id_user);
+        $this->db->from('HELP_REQUEST');
+        $result = $this->db->get();
+
+        return $result->result('Help_request_data');
+    }
+
+    public function insert_response($data)
+    {
+//        echo json_encode($data);
+        $result = $this->db->insert_batch('HELP_RESPONSE', $data);
+    }
 }

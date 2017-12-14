@@ -74,4 +74,166 @@ class M_location extends TDB_Model
 
         return $this->db->trans_status();
     }
+
+    /**
+     * @param string $id_user
+     * @param string $help_type
+     * @param float $latitude
+     * @param float $longitude
+     * @param int $max_rage_km
+     * @param int $limit
+     *
+     * @return \Nearby_data[]
+     */
+    public function get_nearby_personal(string $id_user, string $help_type, float $latitude, float $longitude,
+        int $max_rage_km = 5, int $limit = 5)
+    {
+        $this->db->select('USER_LOCATION.LATITUDE,
+	USER_LOCATION.LONGITUDE,
+	USER_LOCATION.`STATUS`,
+	USER_LOCATION.ID_USER as ID,
+	`USER`.ID as ID_USER,
+	`USER`.USERNAME,
+	`USER`.EMAIL,
+	`USER`.FULL_NAME as NAME,
+	`USER`.PHONE,
+	`USER`.GENDER,
+	`USER`.AVATAR,
+	`USER`.ADDRESS,
+	`USER`.DEVICE_ID,
+	`USER`.ID_CREATE,
+	`USER`.DATE_CREATE,
+	`USER`.ID_UPDATE,
+	`USER`.DATE_UPDATE,
+	`USER`.TYPE,
+	USER_HELP_CONF.ID_HELP_TYPE,
+	USER_HELP_CONF.`STATUS` as STATUS_USER_CONF,'
+                          . $this->distance_query($latitude,
+                                                  $longitude,
+                                                  'USER_LOCATION.LATITUDE',
+                                                  'USER_LOCATION.LONGITUDE'),
+                          false);
+        $this->db->from('USER_LOCATION');
+
+        $this->db->join('USER',
+                        'USER_LOCATION.ID_USER = `USER`.ID AND `USER`.ID <> ' . $this->db->escape($id_user)
+                        . ' AND `USER`.STATUS=' . User_data::$STATUS_ACTIVE
+                        . ' AND `USER`.TYPE=' . User_data::$TYPE_PERSONAL
+                        . ' AND `USER`.DEVICE_ID IS NOT NULL',
+                        'INNER',
+                        false);
+        $this->db->join('USER_HELP_CONF',
+                        'USER_HELP_CONF.ID_USER = `USER`.ID AND USER_HELP_CONF.ID_HELP_TYPE = '
+                        . $this->db->escape($help_type) . ' AND USER_HELP_CONF.`STATUS` = 1',
+                        'INNER',
+                        false);
+
+        $this->db->where('USER_LOCATION.STATUS', 1);
+
+        // Exclude the user in searching help process
+        $this->db->where('(SELECT COUNT(HELP_REQUEST.ID) AS IN_PROGRESS FROM HELP_REQUEST WHERE HELP_REQUEST.ID_USER = `USER`.ID AND (HELP_REQUEST.`STATUS` = '
+                         . Help_request_data::$STATUS_REQUESTED . ' OR HELP_REQUEST.`STATUS` = '
+                         . Help_request_data::$STATUS_PROCESS . ')) =',
+                         0);
+
+        $this->db->having('DISTANCE <=', $max_rage_km);
+        $this->db->order_by('DISTANCE', 'ASC');
+        $this->db->limit($limit);
+//        echo $this->db->get_compiled_select();die;
+        $result = $this->db->get();
+
+        return $result->result('Nearby_data');
+    }
+
+    /**
+     * @param string $id_user
+     * @param string $help_type
+     * @param float $latitude
+     * @param float $longitude
+     * @param string $time_request
+     * @param int $max_rage_km
+     * @param int $limit
+     *
+     * @return \Nearby_data[]
+     */
+    public function get_nearby_garage(string $id_user, string $help_type, float $latitude, float $longitude,
+        string $time_request, int $max_rage_km = 5, int $limit = 5)
+    {
+        $this->db->select('GARAGE.ID,
+	GARAGE.`NAME`,
+	GARAGE.OPEN_HOUR,
+	GARAGE.CLOSE_HOUR,
+	GARAGE.ADDRESS,
+	GARAGE.LATITUDE,
+	GARAGE.LONGITUDE,
+	GARAGE.FORCE_CLOSE,
+	GARAGE.ID_CREATE,
+	GARAGE.DATE_CREATE,
+	GARAGE.ID_UPDATE,
+	GARAGE.DATE_UPDATE,
+	`USER`.ID AS ID_USER,
+	`USER`.USERNAME,
+	`USER`.EMAIL,
+	`USER`.PHONE,
+	`USER`.GENDER,
+	`USER`.AVATAR,
+	`USER`.DEVICE_ID,
+	`USER`.TYPE,
+	`USER`.STATUS,
+	USER_HELP_CONF.ID_HELP_TYPE,
+	USER_HELP_CONF.`STATUS` as STATUS_USER_CONF,'
+                          . $this->distance_query($latitude,
+                                                  $longitude,
+                                                  'GARAGE.LATITUDE',
+                                                  'GARAGE.LONGITUDE'),
+                          false);
+        $this->db->from('GARAGE');
+
+        $this->db->join('`USER`',
+                        '`GARAGE`.`ID_USER` = `USER`.ID AND `USER`.ID <> ' . $this->db->escape($id_user)
+                        . ' AND `USER`.`STATUS`=' . User_data::$STATUS_ACTIVE
+                        . ' AND `USER`.`TYPE`=' . User_data::$TYPE_GARAGE
+                        . ' AND `USER`.`DEVICE_ID` IS NOT NULL',
+                        'INNER',
+                        false);
+        $this->db->join('`USER_HELP_CONF`',
+                        '`USER_HELP_CONF`.`ID_USER` = `USER`.ID AND USER_HELP_CONF.ID_HELP_TYPE = '
+                        . $this->db->escape($help_type) . ' AND USER_HELP_CONF.`STATUS` = 1',
+                        'INNER',
+                        false);
+
+        $time_request = date('H:i', strtotime($time_request));
+//        $this->db->where('(GARAGE.OPEN_HOUR <= '. $this->db->escape($time_request) .' OR GARAGE.CLOSE_HOUR >= '.
+//                         $this->db->escape($time_request) .')');
+        $this->db->where('GARAGE.OPEN_HOUR <=', $time_request);
+        $this->db->where('GARAGE.CLOSE_HOUR >=', $time_request);
+        $this->db->where('GARAGE.FORCE_CLOSE', 0);
+        $this->db->having('DISTANCE <=', $max_rage_km);
+        $this->db->order_by('DISTANCE', 'ASC');
+        $this->db->limit($limit);
+//        echo $this->db->get_compiled_select();die;
+        $result = $this->db->get();
+
+        return $result->result('Nearby_data');
+    }
+
+    /**
+     * Query for get DISTANCE from given latitude and longitude
+     * Get from: https://developers.google.com/maps/solutions/store-locator/clothing-store-locator#domxml
+     *
+     * @param float $latitude
+     * @param float $longitude
+     * @param string $column_latitude
+     * @param string $column_longitude
+     *
+     * @return string
+     */
+    private function distance_query(float $latitude, float $longitude, string $column_latitude,
+        string $column_longitude): string
+    {
+        return '(3959 * acos(cos(radians(' . $latitude . ')) * cos( radians(' . $this->db->escape_str($column_latitude)
+               . ')) * cos(radians( ' . $this->db->escape_str($column_longitude) . ') - radians(' . $longitude
+               . ') ) + sin(radians(' . $latitude . ')) * sin(radians(' . $this->db->escape_str($column_latitude)
+               . ')))) AS DISTANCE';
+    }
 }

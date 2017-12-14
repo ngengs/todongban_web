@@ -40,6 +40,8 @@ class TDB_Controller extends CI_Controller
     private $api_controller;
     /** @var \User_data */
     private $user;
+    /** @var string $token */
+    private $token;
 
     /**
      * MY_Controller constructor.
@@ -72,6 +74,19 @@ class TDB_Controller extends CI_Controller
     }
 
     /**
+     * @return string|null Token
+     * @throws \BadFunctionCallException
+     */
+    protected function get_token()
+    {
+        if (!$this->api_controller) {
+            throw new BadFunctionCallException('Only for API type controller');
+        }
+
+        return $this->token;
+    }
+
+    /**
      * Function to check if user can access.
      * This method must call in every router who need only logged in access.
      *
@@ -87,8 +102,8 @@ class TDB_Controller extends CI_Controller
         if (empty($this->user)) {
             $user = null;
             if ($this->api_controller) {
-                $token = $this->explode_authorization();
-                $data = $this->extract_data_from_token($token);
+                $this->token = $this->explode_authorization();
+                $data = $this->extract_data_from_token($this->token);
                 if (is_array($data) && count($data) == 2) {
                     $user = $this->check_token_data($data[0], $data[1]);
                 }

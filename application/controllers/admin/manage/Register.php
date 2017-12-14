@@ -79,18 +79,21 @@ class Register extends TDB_Controller
             $this->log->write_log('debug', $this->TAG . ': validate: user:' . json_encode($registered));
             if (!empty($registered)) {
                 $registered = $registered[0];
-                $this->load->library('fcm');
-                $title = 'Status Verifikasi ' . $this->config->item('app_name');
-                $message = 'Pendaftaran anda telah di verifikasi, silahkan menggunakan aplikasi dan membantu sesama';
-                $this->fcm->set_target($registered->DEVICE_ID)
-                          ->set_key($this->config->item('fcm_key', 'sensitive'))
-                          ->set_title($title)
-                          ->set_message($message)
-                          ->set_code(Fcm::CODE_REGISTER_COMPLETE)
-                          ->send();
+                if (!empty($registered->DEVICE_ID)) {
+                    $this->load->library('fcm');
+                    $title = 'Status Verifikasi ' . $this->config->item('app_name');
+                    $message =
+                        'Pendaftaran anda telah di verifikasi, silahkan menggunakan aplikasi dan membantu sesama';
+                    $this->fcm->set_target($registered->DEVICE_ID)
+                              ->set_key($this->config->item('fcm_key', 'sensitive'))
+                              ->set_title($title)
+                              ->set_message($message)
+                              ->set_code(Fcm::CODE_REGISTER_COMPLETE)
+                              ->send();
 
-                $message = $message . ' pada ' . date('d M Y H:i');
+                    $message = $message . ' pada ' . date('d M Y H:i');
 //                $this->send_email($registered->EMAIL, $title, $message);
+                }
             }
         }
         redirect('admin/manage/register');

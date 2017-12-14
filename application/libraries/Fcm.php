@@ -38,6 +38,8 @@ class Fcm
     const CODE_REGISTER_REJECTED = 101;
     const CODE_HELP_REQUEST = 200;
     const CODE_HELP_RESPONSE = 201;
+    const CODE_HELP_SEARCH_GARAGE = 202;
+    const CODE_HELP_SEARCH_PERSONAL = 203;
 
     /**
      * Fcm constructor.
@@ -45,8 +47,8 @@ class Fcm
     public function __construct()
     {
         $this->CI =& get_instance();
-        $this->payload = [];
-        $this->CI->config->load('sensitive');
+        $this->CI->config->load('sensitive', true);
+        $this->reset();
     }
 
 
@@ -105,8 +107,11 @@ class Fcm
         $can_set = false;
         switch ($code) {
             case self::CODE_HELP_REQUEST:
+            case self::CODE_HELP_RESPONSE:
             case self::CODE_REGISTER_COMPLETE:
             case self::CODE_REGISTER_REJECTED:
+            case self::CODE_HELP_SEARCH_GARAGE:
+            case self::CODE_HELP_SEARCH_PERSONAL:
                 $can_set = true;
                 break;
         }
@@ -136,6 +141,7 @@ class Fcm
     public function set_payload(string $key, string $value): self
     {
         $this->payload[$key] = $value;
+
         return $this;
     }
 
@@ -152,14 +158,14 @@ class Fcm
     }
 
 
+    /**
+     * @throws \Exception
+     */
     public function send()
     {
-        $this->CI->log->write_log('debug', $this->TAG . ': key: ' . $this->key);
-        if (empty($this->payload) || empty($this->payload['title']) || empty($this->payload['message'])
-            || empty($this->payload['code'])
-            || empty($this->to)
-            || empty($this->key)) {
-            throw new Exception("Must build with all set first");
+        $this->CI->log->write_log('debug', $this->TAG . ': ' . $this);
+        if (empty($this->payload) || empty($this->payload['code']) || empty($this->to) || empty($this->key)) {
+            throw new Exception('Must build with all set first');
         } else {
             $client = new \GuzzleHttp\Client(['curl' => [CURLOPT_SSL_VERIFYPEER => false]]);
             $data = [];
@@ -179,5 +185,20 @@ class Fcm
                              ]);
         }
     }
+
+    public function reset()
+    {
+        $this->payload = [];
+        $this->to = null;
+        $this->key = $this->CI->config->item('fcm_key', 'sensitive');
+    }
+
+    public function __toString()
+    {
+        $payload = json_encode($this->payload);
+
+        return 'to: ' . $this->to . ', key: ' . $this->key . ', payload: ' . $payload;
+    }
+
 
 }

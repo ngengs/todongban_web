@@ -39,19 +39,38 @@ class TDB_Model extends CI_Model
      * Function to generate ID.
      * This use mysql UUID.
      *
-     * @return string|null generated ID
+     * @param int $many
+     *
+     * @return string|array|null generated ID
      * @throws \Exception if cant create ID
      */
-    public function generate_id(): ?string
+    public function generate_id(int $many = 1)
     {
-        $this->db->select('UUID() as id', false);
+        $select = 'UUID() as ID';
+        if ($many > 1) {
+            $selects = [];
+            for ($i = 0; $i < $many; $i++) {
+                $selects[] = 'UUID() AS ID_' . $i;
+            }
+            $select = implode(',', $selects);
+        }
+        $this->db->select($select, false);
         $result = $this->db->get();
         $result = $result->result();
         if (empty($result)) {
             throw new Exception('Something wrong with database');
         }
 
-        return $result[0]->id;
+        if ($many > 1) {
+            $ids = [];
+            for ($i = 0; $i < $many; $i++) {
+                $ids[$i] = $result[0]->{'ID_' . $i};
+            }
+
+            return $ids;
+        } else {
+            return $result[0]->ID;
+        }
     }
 
     /**
