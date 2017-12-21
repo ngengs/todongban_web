@@ -48,10 +48,13 @@ if (php_sapi_name() === 'cli') {
     } else {
         $config['base_http'] = 'http://';
     }
-    $config['base_port'] = ':' . $_SERVER['SERVER_PORT'];
-    $config['base_directory'] = ROOTPATH;
+    $config['base_port'] = '';
+    if ($_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443) {
+        $config['base_port'] = ':' . $_SERVER['SERVER_PORT'];
+    }
+    $config['base_directory'] = (NEED_BASE_DIR) ? ROOTPATH . '/' : '';
     $config['base_url'] =
-        $config['base_http'] . $_SERVER['SERVER_NAME'] . $config['base_port'] . '/' . $config['base_directory'] . '/';
+        $config['base_http'] . $_SERVER['SERVER_NAME'] . $config['base_port'] . '/' . $config['base_directory'];
 }
 
 /*
