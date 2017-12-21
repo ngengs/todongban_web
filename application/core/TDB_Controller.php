@@ -258,7 +258,7 @@ class TDB_Controller extends CI_Controller
             throw new BadFunctionCallException('Only for API type controller');
         }
 
-        $header_value = $this->input->get_request_header('authorization');
+        $header_value = $this->input->get_request_header('Authorization');
         if (empty($header_value)) {
             $this->response_error(STATUS_CODE_NOT_AUTHORIZED, VALUE_STATUS_MESSAGE_FORBIDDEN);
         }
