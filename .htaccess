@@ -235,7 +235,7 @@ ExpiresByType image/gif A31536000
 ExpiresByType application/x-gzip A31536000
 ExpiresByType image/x-icon A31536000
 ExpiresByType image/jpeg A31536000
-ExpiresByType application/json A31536000
+#ExpiresByType application/json A31536000
 ExpiresByType application/vnd.ms-access A31536000
 ExpiresByType audio/midi A31536000
 ExpiresByType video/quicktime A31536000
