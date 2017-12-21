@@ -68,13 +68,36 @@ if (!function_exists('js_plugin_url')) {
     }
 }
 
+if (!function_exists('avatar_user_url_return')) {
+    /**
+     * @param \User_data $user
+     *
+     * @return string
+     */
+    function avatar_user_url_return($user)
+    {
+        return base_url('uploads/' . $user->USERNAME . '/' . $user->AVATAR);
+    }
+}
 if (!function_exists('avatar_user_url')) {
     /**
      * @param \User_data $user
      */
     function avatar_user_url($user)
     {
-        echo base_url('uploads/' . $user->USERNAME . '/' . $user->AVATAR);
+        echo avatar_user_url_return($user);
+    }
+}
+if (!function_exists('identity_user_url_return')) {
+
+    /**
+     * @param \User_data $user
+     *
+     * @return string
+     */
+    function identity_user_url_return($user)
+    {
+        return base_url('uploads/' . $user->USERNAME . '/' . $user->IDENTITY_PICTURE);
     }
 }
 if (!function_exists('identity_user_url')) {
@@ -84,7 +107,7 @@ if (!function_exists('identity_user_url')) {
      */
     function identity_user_url($user)
     {
-        echo base_url('uploads/' . $user->USERNAME . '/' . $user->IDENTITY_PICTURE);
+        echo identity_user_url_return($user);
     }
 }
 

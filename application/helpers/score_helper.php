@@ -54,6 +54,9 @@ if (!function_exists('score_weight')) {
         $sqrt = sqrt((($positive * $negative) / ($positive + $negative)) + 0.9604);
         $i = (($positive + 1.9208) / ($positive + $negative) - 1.96 * $sqrt / ($positive + $negative));
 
+        echo '<br>';
+        echo($i / (1 + 3.8416 / ($positive + $negative)));
+        die;
         return ($i / (1 + 3.8416 / ($positive + $negative)));
     }
 }
@@ -72,6 +75,9 @@ if (!function_exists('five_star_rating_weight')) {
     {
         $positive = $two * 0.25 + $three * 0.5 + $four * 0.75 + $five;
         $negative = $one + $two * 0.75 + $three * 0.5 + $four * 0.25;
+        echo $negative . " " . $positive;
+
+//        die;
 
         return score_weight($positive, $negative);
     }
@@ -88,8 +94,30 @@ if (!function_exists('five_star_rating_avg_weight')) {
     {
         $positive = ($avg * $total - $total) / 4;
         $negative = $total - $positive;
+        echo $negative . " " . $positive;
 
         return score_weight($positive, $negative);
+    }
+}
+
+
+if (!function_exists('five_star_rating_evan_miller')) {
+    /**
+     * @param $one int Count of star 1
+     * @param $two int Count of star 2
+     * @param $three int Count of star 3
+     * @param $four int Count of star 4
+     * @param $five int Count of star 5
+     *
+     * @return float|int weight score
+     */
+    function five_star_rating_evan_miller($one, $two, $three, $four, $five)
+    {
+        $N = $one + $two + $three + $four + $five;
+        $K = 5; // count();
+        $s = 0;
+
+        return 9;
     }
 }
 

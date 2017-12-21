@@ -30,40 +30,35 @@ class Help_response_data extends Base_data
     public static $RESPONSE_WAITING = 0;
     public static $RESPONSE_ACCEPT = 1;
     public static $RESPONSE_REJECT = 2;
-    /**
-     * @var float $LATITUDE
-     */
-    public $LATITUDE;
-    /**
-     * @var float $LONGITUDE
-     */
-    public $LONGITUDE;
 
     /**
-     * @var string $ID_USER ID Requested User
+     * @var string $ID_USER ID Response User
      */
     public $ID_USER;
 
     /**
-     * @var string $ID_HELP_TYPE ID from help type
+     * @var string $ID_HELP_REQUEST ID from help request
      */
-    public $ID_HELP_TYPE;
+    public $ID_HELP_REQUEST;
     /**
-     * @var string $MESSAGE Status Message from requested user
+     * @var int $RESPONSE Response user
      */
-    public $MESSAGE;
+    public $RESPONSE;
     /**
-     * @var string $LOCATION_NAME Location Name
+     * @var string $RATING Rating point. 5 star system.
      */
-    public $LOCATION_NAME;
+    public $RATING;
 
 
     public function __cast()
     {
         parent::__cast();
 
-        $this->LATITUDE = (float)$this->LATITUDE;
-        $this->LONGITUDE = (float)$this->LONGITUDE;
+        $this->RESPONSE = (int)$this->RESPONSE;
+        if (is_null($this->RATING)) {
+            $this->RATING = 0;
+        }
+        $this->RATING = (int)$this->RATING;
     }
 
     public function __toString()

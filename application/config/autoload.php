@@ -170,7 +170,10 @@ $object_data_autoload['config'] = [
     'Config_data',
     'Nearby_data',
     'Help_request_data',
-    'Help_response_data'
+    'Help_response_data',
+    'Help_response_user_data',
+    'History_data',
+    'Badge_data'
 ];
 foreach ($object_data_autoload['config'] as $key => $value) {
     require_once(APPPATH . 'objects/' . $value . '.php');

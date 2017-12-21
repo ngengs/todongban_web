@@ -42,6 +42,7 @@ class Fcm
     const CODE_HELP_SEARCH_PERSONAL = 203;
     const CODE_HELP_RESPONSE_ACCEPTED = 204;
     const CODE_HELP_RESPONSE_REJECTED = 205;
+    const CODE_HELP_REQUEST_FINISH = 210;
 
     /**
      * Fcm constructor.
@@ -116,6 +117,7 @@ class Fcm
             case self::CODE_HELP_SEARCH_PERSONAL:
             case self::CODE_HELP_RESPONSE_ACCEPTED:
             case self::CODE_HELP_RESPONSE_REJECTED:
+            case self::CODE_HELP_REQUEST_FINISH:
                 $can_set = true;
                 break;
         }

@@ -34,6 +34,13 @@ class Config_data extends Base_data
      */
     public static $VEHICLE_CAR = 2;
 
+    public static $TYPE_MOTORCYCLE_FLAT_TIRE = "18e135f0-6406-11e7-bfcc-68f7286287bc";
+    public static $TYPE_MOTORCYCLE_NO_FUEL = "22b36853-6406-11e7-bfcc-68f7286287bc";
+    public static $TYPE_MOTORCYCLE_BROKEN = "25df3334-6406-11e7-bfcc-68f7286287bc";
+    public static $TYPE_CAR_FLAT_TIRE = "2b095992-6406-11e7-bfcc-68f7286287bc";
+    public static $TYPE_CAR_NO_FUEL = "2e3905d8-6406-11e7-bfcc-68f7286287bc";
+    public static $TYPE_CAR_BROKEN = "317b5fd5-6406-11e7-bfcc-68f7286287bc";
+
     /**
      * @var string $ID_USER
      */
@@ -54,7 +61,7 @@ class Config_data extends Base_data
     public function __cast()
     {
         parent::__cast();
-        $this->VEHICLE = (int) $this->VEHICLE;
+        $this->VEHICLE = (int)$this->VEHICLE;
     }
 
     public function __toString()

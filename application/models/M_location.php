@@ -86,7 +86,7 @@ class M_location extends TDB_Model
      * @return \Nearby_data[]
      */
     public function get_nearby_personal(string $id_user, string $help_type, float $latitude, float $longitude,
-        int $max_rage_km = 5, int $limit = 5)
+        int $max_rage_km = 10, int $limit = 5)
     {
         $this->db->select('USER_LOCATION.LATITUDE,
 	USER_LOCATION.LONGITUDE,
@@ -139,6 +139,7 @@ class M_location extends TDB_Model
         $this->db->having('DISTANCE <=', $max_rage_km);
         $this->db->order_by('DISTANCE', 'ASC');
         $this->db->limit($limit);
+//        $this->log->write_log('debug', $this->TAG . ': get_nearby_personal: QUERY: ' .  $this->db->get_compiled_select());
 //        echo $this->db->get_compiled_select();die;
         $result = $this->db->get();
 
@@ -217,6 +218,70 @@ class M_location extends TDB_Model
         return $result->result('Nearby_data');
     }
 
+    public function distance_from_current_location_personal(string $id_user, float $latitude, float $longitude)
+    {
+        $this->db->select($this->distance_query($latitude, $longitude, 'LATITUDE', 'LONGITUDE'));
+        $this->db->from('USER_LOCATION');
+        $this->db->where('ID_USER', $id_user);
+        $this->db->where('STATUS', 1);
+        $result = $this->db->get();
+
+        $result = $result->result();
+        if (!empty($result)) {
+            $result = $result[0];
+
+            return $result->DISTANCE;
+        }
+
+        return 0;
+    }
+
+    public function distance_from_current_location_garage(string $id_user, float $latitude, float $longitude)
+    {
+        $this->db->select($this->distance_query($latitude, $longitude, 'LATITUDE', 'LONGITUDE'));
+        $this->db->from('GARAGE');
+        $this->db->where('ID_USER', $id_user);
+        $result = $this->db->get();
+
+        $result = $result->result();
+        if (!empty($result)) {
+            $result = $result[0];
+
+            return $result->DISTANCE;
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param float $latitude
+     * @param float $longitude
+     * @param $date_start
+     * @param $date_end
+     * @param int $max_range_km
+     *
+     * @return \Help_request_data[]
+     */
+    public function get_nearby_request(float $latitude, float $longitude, $date_start, $date_end,
+        int $max_range_km = 10)
+    {
+//        echo date('Y-m-d', strtotime($date_start));die;
+        $this->db->select('ID,	ID_USER, ID_HELP_TYPE, MESSAGE, LATITUDE, LONGITUDE, LOCATION_NAME, ID_CREATE, DATE_CREATE, ID_UPDATE, DATE_UPDATE, STATUS, '
+                          . $this->distance_query($latitude, $longitude, 'LATITUDE', 'LONGITUDE'));
+        $this->db->from('HELP_REQUEST');
+        $this->db->where('(DATE_CREATE BETWEEN '
+                         . $this->db->escape(date('Y-m-d', strtotime($date_start))) . ' AND '
+                         . $this->db->escape(date('Y-m-d', strtotime('+1 day', strtotime($date_end)))) . ')',
+                         null,
+                         false);
+        $this->db->having('DISTANCE <=', $max_range_km);
+        $this->db->order_by('DATE_CREATE ', 'ASC');
+//        echo $this->db->get_compiled_select();
+        $result = $this->db->get();
+
+        return $result->result('Help_request_data');
+    }
+
     /**
      * Query for get DISTANCE from given latitude and longitude
      * Get from: https://developers.google.com/maps/solutions/store-locator/clothing-store-locator#domxml
@@ -234,6 +299,26 @@ class M_location extends TDB_Model
         return '(3959 * acos(cos(radians(' . $latitude . ')) * cos( radians(' . $this->db->escape_str($column_latitude)
                . ')) * cos(radians( ' . $this->db->escape_str($column_longitude) . ') - radians(' . $longitude
                . ') ) + sin(radians(' . $latitude . ')) * sin(radians(' . $this->db->escape_str($column_latitude)
+               . ')))) AS DISTANCE';
+    }
+
+    /**
+     * Query for get DISTANCE from given latitude and longitude
+     * Get from: https://developers.google.com/maps/solutions/store-locator/clothing-store-locator#domxml
+     *
+     * @param float $latitude
+     * @param float $longitude
+     * @param float $latitude_initial
+     * @param float $longitude_initial
+     *
+     * @return string
+     */
+    private function distance_query_coordinate(float $latitude, float $longitude, float $latitude_initial,
+        float $longitude_initial): string
+    {
+        return '(3959 * acos(cos(radians(' . $latitude . ')) * cos( radians(' . $latitude_initial
+               . ')) * cos(radians( ' . $longitude_initial . ') - radians(' . $longitude
+               . ') ) + sin(radians(' . $latitude . ')) * sin(radians(' . $latitude_initial
                . ')))) AS DISTANCE';
     }
 }

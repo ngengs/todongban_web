@@ -167,6 +167,27 @@ class M_user extends TDB_Model
         return $result;
     }
 
+    /**
+     * @param string $id
+     * @param string $new_password
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function update_password(string $id, string $new_password)
+    {
+        $password_hash = password_hash($new_password, PASSWORD_BCRYPT);
+        if (!$password_hash) {
+            throw new Exception('Failed hashing password');
+        }
+        $this->db->set('PASSWORD', $password_hash);
+        $this->set_updater($id);
+        $this->db->where('ID', $id);
+        $result = $this->db->update('USER');
+
+        return $result;
+    }
+
     public function delete_pure(string $id)
     {
         $this->db->where('ID', $id);

@@ -42,6 +42,10 @@ class Help_request_data extends Base_data
      * @var string $ID_USER ID Requested User
      */
     public $ID_USER;
+    /**
+     * @var string $DEVICE_ID Device Requested User
+     */
+    public $DEVICE_ID;
 
     /**
      * @var string $ID_HELP_TYPE ID from help type
@@ -55,6 +59,18 @@ class Help_request_data extends Base_data
      * @var string $LOCATION_NAME Location Name
      */
     public $LOCATION_NAME;
+    /**
+     * @var string $FULL_NAME Requested Name
+     */
+    public $FULL_NAME;
+    /**
+     * @var string $USERNAME Requested username
+     */
+    public $USERNAME;
+    /**
+     * @var string $AVATAR Requested Profile Picture / Avatar
+     */
+    public $AVATAR;
 
 
     public function __cast()
@@ -63,6 +79,13 @@ class Help_request_data extends Base_data
 
         $this->LATITUDE = (float)$this->LATITUDE;
         $this->LONGITUDE = (float)$this->LONGITUDE;
+    }
+
+    public function __cast_date()
+    {
+        $this->__cast();
+        $this->DATE_CREATE = date('Y-m-d', strtotime($this->DATE_CREATE));
+        $this->DATE_UPDATE = date('Y-m-d', strtotime($this->DATE_UPDATE));
     }
 
     public function __toString()

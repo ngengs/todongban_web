@@ -93,4 +93,14 @@ class M_garage extends TDB_Model
 
         return $result->result('Garage_data');
     }
+
+    public function edit(string $user_id, string $open_hour, string $close_hour, int $force_close)
+    {
+        $this->db->set('OPEN_HOUR', date('H:i:s', strtotime($open_hour)));
+        $this->db->set('CLOSE_HOUR', date('H:i:s', strtotime($close_hour)));
+        $this->db->set('FORCE_CLOSE', $force_close);
+        $this->db->where('ID_USER', $user_id);
+        $this->db->from('GARAGE');
+        $this->db->update();
+    }
 }

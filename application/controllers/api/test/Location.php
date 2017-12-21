@@ -49,6 +49,12 @@ class Location extends TDB_Controller
         $this->response(['personal' => $data_personal, 'garage' => $data_garage]);
     }
 
+    /**
+     * @param null $count
+     *
+     * @throws \BadFunctionCallException
+     * @throws \Exception
+     */
     public function test_get($count = null)
     {
         $this->load->model('m_user');
@@ -64,6 +70,57 @@ class Location extends TDB_Controller
         $this->config->load('sensitive', true);
         $fcm_key = $this->config->item('maps_key', 'sensitive');
         echo $fcm_key;
+    }
+
+    /**
+     * @throws \BadFunctionCallException
+     */
+    public function distance_response_post()
+    {
+
+        if (!$this->check_access()) {
+            $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Cant access');
+        }
+        $id_response = $this->input->post('id_response');
+        if (empty($id_response)) {
+            $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Data not complete');
+        }
+        $user = $this->get_user();
+        $this->load->model('m_help');
+        $responses = $this->m_help->get_request_by_response($id_response);//, $user->ID);
+        /**
+         * @var \Help_response_data|null $response
+         */
+        $response = null;
+        if (!empty($responses)) {
+            $response = $responses[0];
+            $response->__cast();
+        }
+        $id_request = $response->ID;//$this->input->post('id_request');
+        $distance = 0;//$this->input->post('distance');
+        if (empty($id_request)) {//} || is_null($distance)) {
+            $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Data not complete: ' . $response);
+        }
+        $helps = $this->m_help->get_request($id_request);//, $user->ID);
+        /**
+         * @var \Help_request_data|null $help
+         */
+        $help = null;
+        if (!empty($helps)) {
+            $help = $helps[0];
+        }
+//        var_dump($helps);die;
+        $this->load->model('m_location');
+        if ($user->TYPE == User_data::$TYPE_PERSONAL) {
+            $distance = $this->m_location->distance_from_current_location_personal($user->ID,
+                                                                                   $help->LATITUDE,
+                                                                                   $help->LONGITUDE);
+        } else {
+            $distance = $this->m_location->distance_from_current_location_garage($user->ID,
+                                                                                 $help->LATITUDE,
+                                                                                 $help->LONGITUDE);
+        }
+        $this->response((float)$distance);
     }
 
 }

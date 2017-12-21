@@ -69,3 +69,5 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'admin/auth';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = true;
+$route['admin'] = 'admin/dashboard';
+$route['share/badge/(:any)'] = 'share/badge/index/$1';

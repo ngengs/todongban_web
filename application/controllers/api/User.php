@@ -302,13 +302,15 @@ class User extends TDB_Controller
         $user = $this->get_user();
         if ($can_access) {
             if (!empty($user)) {
+                $this->load->helper('assets_helper');
                 $status = [
                     'username' => $user->USERNAME,
                     'email' => $user->EMAIL,
                     'full_name' => $user->FULL_NAME,
                     'gender' => $user->GENDER,
                     'status' => $user->STATUS,
-                    'type' => $user->TYPE
+                    'type' => $user->TYPE,
+                    'avatar' => avatar_user_url_return($user)
                 ];
             }
         } else {
@@ -346,6 +348,40 @@ class User extends TDB_Controller
         } else {
             $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Failed update device id');
         }
+    }
+
+    /**
+     * @throws \BadFunctionCallException
+     * @throws \Exception
+     */
+    public function update_password_post()
+    {
+        $this->log->write_log('debug', $this->TAG . ': update_password: ');
+        if (!$this->check_access()) {
+            $this->response_error(STATUS_CODE_NOT_AUTHORIZED, 'Cant access');
+        }
+        $old_password = $this->input->post('old_password');
+        $new_password = $this->input->post('new_password');
+        if (empty($old_password) || empty($new_password)) {
+            $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Data not complete');
+        }
+        $user = $this->get_user();
+        $this->load->model('m_user');
+        $old_users = $this->m_user->get($user->USERNAME);
+        if (empty($old_users)) {
+            $this->response_error(500, "Cant get user");
+        }
+        $old_user = $old_users[0];
+        if (!password_verify($old_password, $old_user->PASSWORD)) {
+            $this->response_error(501, "Wrong old password");
+        }
+        $result = $this->m_user->update_password($user->ID, $new_password);
+        if (!empty($result)) {
+            $this->response(null);
+        } else {
+            $this->response_error(502, "Failed update password");
+        }
+
     }
 
     /**
