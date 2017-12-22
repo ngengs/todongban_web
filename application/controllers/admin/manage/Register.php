@@ -92,7 +92,7 @@ class Register extends TDB_Controller
                               ->send();
 
                     $message = $message . ' pada ' . date('d M Y H:i');
-//                $this->send_email($registered->EMAIL, $title, $message);
+                    $this->send_email($registered->EMAIL, $title, $message);
                 }
             }
         }
