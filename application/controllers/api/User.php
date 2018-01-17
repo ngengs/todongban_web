@@ -217,7 +217,7 @@ class User extends TDB_Controller
                                         $identity,
                                         $address,
                                         $device_id,
-                                        2,
+                                        User_data::$STATUS_NOT_ACTIVE,
                                         $type);
         if ($result) {
             if ($type == 2) {
@@ -382,14 +382,6 @@ class User extends TDB_Controller
             $this->response_error(502, "Failed update password");
         }
 
-    }
-
-    /**
-     * @throws \BadFunctionCallException
-     */
-    public function check_get()
-    {
-        var_dump($this->check_access());
     }
 
 }

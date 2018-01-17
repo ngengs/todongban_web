@@ -161,7 +161,6 @@ class Help extends TDB_Controller
                                                                    $help->LATITUDE,
                                                                    $help->LONGITUDE,
                                                                    $help->DATE_CREATE);
-//            $this->response($nearby_garages);
 
             $this->log->write_log('debug', $this->TAG . ': helper_search: garage: ' . json_encode($nearby_garages));
             // Lets save help response from garage
@@ -191,16 +190,11 @@ class Help extends TDB_Controller
             }
             $this->m_help->insert_response($insert_garages);
             $this->load->library('fcm');
-//            $this->config->load('sensitive', true);
-//            $fcm_key = $this->config->item('fcm_key', 'sensitive');
-//            $this->response($insert_garages);
-
 //             Lets send notification to user and user
             for ($i = 0; $i < count($nearby_garages); $i++) {
                 $garage = $nearby_garages[$i];
                 $garage->__cast();
                 $this->fcm->set_target($user->DEVICE_ID)
-//                          ->set_key($fcm_key)
                           ->set_code(Fcm::CODE_HELP_RESPONSE)
                           ->set_payloads([
                                              'id' => $id_insert_garages[$i],
@@ -213,7 +207,6 @@ class Help extends TDB_Controller
                           ->send();
                 $this->fcm->reset();
                 $this->fcm->set_target($garage->DEVICE_ID)
-//                          ->set_key($fcm_key)
                           ->set_code(Fcm::CODE_HELP_REQUEST)
                           ->set_payloads([
                                              'id' => $id_insert_garages[$i],
@@ -263,20 +256,7 @@ class Help extends TDB_Controller
             for ($i = 0; $i < count($nearby_personal); $i++) {
                 $personal = $nearby_personal[$i];
                 $personal->__cast();
-//                $this->fcm->set_target($user->DEVICE_ID)
-////                          ->set_key($fcm_key)
-//                          ->set_code(Fcm::CODE_HELP_RESPONSE)
-//                          ->set_payloads([
-//                                             'id' => $id_insert_personal[$i],
-//                                             'name' => $personal->NAME,
-//                                             'badge' => 0,
-//                                             'distance' => $personal->DISTANCE,
-//                                             'user_type' => User_data::$TYPE_PERSONAL
-//                                         ])
-//                          ->send();
-//                $this->fcm->reset();
                 $this->fcm->set_target($personal->DEVICE_ID)
-//                          ->set_key($fcm_key)
                           ->set_code(Fcm::CODE_HELP_REQUEST)
                           ->set_payloads([
                                              'id' => $id_insert_personal[$i],
@@ -288,7 +268,6 @@ class Help extends TDB_Controller
                 $this->fcm->reset();
             }
         }
-
     }
 
     /**
@@ -364,10 +343,10 @@ class Help extends TDB_Controller
             $response = $responses[0];
             $response->__cast();
         }
-        $id_request = $response->ID;//$this->input->post('id_request');
+        $id_request = $response->ID;
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $distance = 0;//$this->input->post('distance');
-        if (empty($id_request)) {//} || is_null($distance)) {
+        $distance = 0;
+        if (empty($id_request)) {
             $this->response_error(STATUS_CODE_KEY_EXPIRED, 'Data not complete');
         }
         $helps = $this->m_help->get_request($id_request);//, $user->ID);
@@ -392,8 +371,6 @@ class Help extends TDB_Controller
                                                                                        $help->LONGITUDE);
             }
             $this->load->library('fcm');
-//            $response = $this->m_help->get_response($id_request, $user->ID);
-//            $response = $response[0];
             $this->fcm->set_target($help->DEVICE_ID)
                       ->set_code(Fcm::CODE_HELP_RESPONSE_ACCEPTED)
                       ->set_payloads([
@@ -404,13 +381,6 @@ class Help extends TDB_Controller
                                          'user_type' => $user->TYPE,
                                          'accept' => true
                                      ])
-//                      ->set_payload('id', $id_response)
-//                      ->set_payload('id', $response->ID)
-//                      ->set_payload('name', $name)
-//                      ->set_payload('badge', 0)
-//                      ->set_payload('distance', (float)$distance)
-//                      ->set_payload('user_type', $user->TYPE)
-//                      ->set_payload('accept', true)
                       ->send();
             $this->log->write_log('debug', $this->TAG . ': accept: ' . $this->fcm);
             $this->fcm->reset();

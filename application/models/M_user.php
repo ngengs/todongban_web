@@ -35,6 +35,27 @@ class M_user extends TDB_Model
         parent::__construct();
     }
 
+    /**
+     * @param string $id
+     * @param string $username
+     * @param string $email
+     * @param string $password
+     * @param string $full_name
+     * @param string $phone
+     * @param int $gender
+     * @param string $birth_date
+     * @param string $avatar
+     * @param string $identity_number
+     * @param string $identity_picture
+     * @param string $address
+     * @param string $device_id
+     * @param int $status
+     * @param int $type
+     *
+     * @return bool
+     * @throws \Exception
+     *
+     */
     public function create(string $id, string $username, string $email, string $password, string $full_name,
         string $phone, int $gender, string $birth_date, string $avatar, string $identity_number,
         string $identity_picture, string $address,
@@ -69,6 +90,11 @@ class M_user extends TDB_Model
         return $result;
     }
 
+    /**
+     * @param string $username
+     *
+     * @return bool
+     */
     public function check_username(string $username): bool
     {
         $this->db->select('ID');

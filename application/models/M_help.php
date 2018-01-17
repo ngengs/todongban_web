@@ -325,6 +325,11 @@ class M_help extends TDB_Model
         return $badge;
     }
 
+    /**
+     * @param string $id_user
+     *
+     * @return int
+     */
     public function response_count(string $id_user)
     {
         $this->db->select('HELP_RESPONSE.ID, HELP_RESPONSE.RATING');
